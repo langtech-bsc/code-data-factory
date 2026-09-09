@@ -1,11 +1,10 @@
 """
-Purpose: Automated construction of Docker images for repositories using profile registry.
+Purpose: Automated construction of Singularity images for repositories using profile registry.
 
-Usage: python -m swesmith.build_repo.create_images --max-workers 4 -p django
+Usage: uv run python -m swesmith.build_repo.create_images --workers 4 --repos django --proceed
 """
 
 import argparse
-import docker
 import traceback
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -14,9 +13,9 @@ from tqdm import tqdm
 from swesmith.profiles import registry
 
 
-def build_profile_image(profile, push=False):
+def build_profile_image(profile, publish=False):
     """
-    Build a Docker image for a specific profile.
+    Build a Singularity image for a specific profile.
 
     Args:
         profile: A RepoProfile instance
@@ -27,7 +26,7 @@ def build_profile_image(profile, push=False):
     try:
         profile.create_mirror()
         profile.build_image()
-        if push:
+        if publish:
             profile.push_image()
         return (profile.image_name, True, None)
     except Exception as e:
@@ -38,13 +37,14 @@ def build_profile_image(profile, push=False):
 def build_all_images(
     workers=4,
     repo_filter=None,
+    language=None,
     proceed=False,
-    push=False,
+    publish=False,
     force=False,
     arch=None,
 ):
     """
-    Build Docker images for all registered profiles in parallel.
+    Build Singularity images for all registered profiles in parallel.
 
     Args:
         workers: Maximum number of parallel workers
@@ -56,8 +56,27 @@ def build_all_images(
     Returns:
         tuple: (successful_builds, failed_builds)
     """
-    # Get all available profiles
-    all_profiles = registry.values()
+    base_names = {
+        "c": "CProfile",
+        "cpp": "CppProfile",
+        "csharp": "CSharpProfile",
+        "go": "GoProfile",
+        "golang": "GoProfile",
+        "java": "JavaProfile",
+        "javascript": "JavaScriptProfile",
+        "php": "PhpProfile",
+        "python": "PythonProfile",
+        "ruby": "RubyProfile",
+        "rust": "RustProfile",
+        "typescript": "TypeScriptProfile",
+    }
+    base_name = base_names.get(language.lower()) if language else None
+    all_profiles = [
+        profile
+        for profile in registry.values()
+        if base_name is None
+        or base_name in {base.__name__ for base in profile.__class__.__mro__}
+    ]
 
     # Update profile architecture if specified
     if arch:
@@ -67,16 +86,11 @@ def build_all_images(
             profile.arch = target_arch
 
     # Remove environments that have already been built
-    client = docker.from_env()
-
     # Filter out profiles that already have images built (unless force is enabled)
     profiles_to_build = []
     if not force:
         for profile in all_profiles:
-            try:
-                # Check if image already exists
-                client.images.get(profile.image_name)
-            except docker.errors.ImageNotFound:
+            if not profile.image_path.exists():
                 profiles_to_build.append(profile)
     else:
         profiles_to_build = list(all_profiles)
@@ -85,10 +99,14 @@ def build_all_images(
     if repo_filter:
         filtered_profiles = []
         for profile in profiles_to_build:
-            # Check if any of the filter patterns appear in the image name
-            if any(
-                pattern.lower() in profile.image_name.lower() for pattern in repo_filter
-            ):
+            haystack = " ".join(
+                [
+                    profile.image_name,
+                    profile.repo_name,
+                    f"{profile.owner}/{profile.repo}",
+                ]
+            ).lower()
+            if any(pattern.lower() in haystack for pattern in repo_filter):
                 filtered_profiles.append(profile)
         profiles_to_build = filtered_profiles
 
@@ -126,7 +144,7 @@ def build_all_images(
         with ThreadPoolExecutor(max_workers=workers) as executor:
             # Submit all build tasks
             future_to_profile = {
-                executor.submit(build_profile_image, profile, push): profile
+                executor.submit(build_profile_image, profile, publish): profile
                 for profile in profiles_to_build
             }
 
@@ -154,7 +172,7 @@ def build_all_images(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Build Docker images for all registered repository profiles"
+        description="Build Singularity images for all registered repository profiles"
     )
     parser.add_argument(
         "-w",
@@ -171,6 +189,10 @@ def main():
         help="Repository name patterns to build (fuzzy match, space-separated)",
     )
     parser.add_argument(
+        "--language",
+        help="Restrict image builds to one profile language",
+    )
+    parser.add_argument(
         "-y", "--proceed", action="store_true", help="Proceed without confirmation"
     )
     parser.add_argument(
@@ -181,9 +203,9 @@ def main():
     )
     parser.add_argument(
         "-p",
-        "--push",
+        "--publish",
         action="store_true",
-        help="Push built images to Docker Hub after building (default: False)",
+        help="Run the compatibility publish step after building (default: False)",
     )
     parser.add_argument(
         "--list-envs", action="store_true", help="List all available profiles and exit"
@@ -197,7 +219,7 @@ def main():
     args = parser.parse_args()
 
     if args.list_envs:
-        print("All execution environment Docker images:")
+        print("All execution environment Singularity images:")
         for profile in registry.values():
             print(f"  {profile.image_name}")
         return
@@ -205,8 +227,9 @@ def main():
     successful, failed = build_all_images(
         workers=args.workers,
         repo_filter=args.repos,
+        language=args.language,
         proceed=args.proceed,
-        push=args.push,
+        publish=args.publish,
         force=args.force,
         arch=args.arch,
     )
@@ -215,6 +238,7 @@ def main():
         print(f"- Failed builds: {failed}")
     if successful:
         print(f"- Successful builds: {len(successful)}")
+    raise SystemExit(1 if failed else 0)
 
 
 if __name__ == "__main__":

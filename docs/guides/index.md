@@ -1,13 +1,13 @@
 # Tutorials
 
-Build unlimited training data and train state-of-the-art SWE-agents. This guide covers the complete workflow: from environment setup to model training and evaluation.
+Build executable task data for software engineering agents. This guide covers the workflow from environment setup through validation and issue generation.
 
 ---
 
 ## 📋 Prerequisites
 
 !!! info "System Requirements"
-    **Required:** Docker
+    **Required:** Singularity/Apptainer and Slurm on MN5
     **Tested on:** Ubuntu 22.04.4 LTS
     **Not supported:** Windows, macOS
 
@@ -19,11 +19,11 @@ New to SWE-smith? Start with [Installation](../getting_started/installation.md) 
 
 <div class="grid cards" markdown>
 
--   :material-docker: **Build Environments**
+-   :material-package-variant: **Build Environments**
 
     ---
 
-    Create reproducible Docker images for any repository. Capture dependencies, build containers, and validate with automated testing.
+    Create reproducible Singularity images for any repository. Capture dependencies, build images, and validate with automated testing.
 
     [:octicons-arrow-right-24: Get started](env_construction.md)
 
@@ -51,22 +51,6 @@ New to SWE-smith? Start with [Installation](../getting_started/installation.md) 
 
     [:octicons-arrow-right-24: Create issues](issue_gen.md)
 
--   :material-speedometer: **Rate Difficulty** · Optional
-
-    ---
-
-    Classify tasks as easy/medium/hard using a fine-tuned Qwen 2.5 Coder model. Compare against SWE-bench benchmarks.
-
-    [:octicons-arrow-right-24: Assess difficulty](difficulty_rating.md)
-
--   :material-school: **Train SWE-agents**
-
-    ---
-
-    Complete RSFT pipeline: generate trajectories, filter successful solutions, fine-tune models, and evaluate on SWE-bench.
-
-    [:octicons-arrow-right-24: Start training](train_swe_agent.md)
-
 </div>
 
 ---
@@ -78,14 +62,9 @@ graph LR
     A[Build Environments] --> B[Create Instances]
     B --> C[Validate & Evaluate]
     C --> D[Generate Issue Text]
-    D --> E[Rate Difficulty]
-    D --> F[Train SWE-agents]
-    E --> F
 ```
 
-1. **Build Environments** → Set up Docker images
+1. **Build Environments** → Set up Singularity images
 2. **Create Instances** → Generate synthetic bugs
 3. **Validate & Evaluate** → Filter valid task instances
 4. **Generate Issue Text** → Add problem descriptions
-5. **Rate Difficulty** *(optional)* → Classify task complexity
-6. **Train SWE-agents** → Fine-tune models with RSFT

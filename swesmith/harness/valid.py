@@ -1,7 +1,7 @@
 """
 Purpose: Transform a bunch of patches that cause bugs into a SWE-bench style dataset.
 
-Usage: python -m swesmith.harness.valid logs/bug_gen/*_patches.json --workers #
+Usage: uv run python -m swesmith.harness.valid logs/bug_gen/*_patches.json --workers #
 """
 
 import argparse
@@ -12,24 +12,23 @@ import threading
 
 from collections import defaultdict
 from pathlib import Path
-from swebench.harness.constants import (
-    KEY_INSTANCE_ID,
-    KEY_PREDICTION,
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     LOG_REPORT,
     LOG_TEST_OUTPUT,
 )
-from swebench.harness.docker_build import close_logger
 from tqdm.auto import tqdm
 from swesmith.constants import (
     KEY_PATCH,
+    KEY_INSTANCE_ID,
+    KEY_PREDICTION,
     KEY_TIMED_OUT,
     LOG_TEST_OUTPUT_PRE_GOLD,
     REF_SUFFIX,
     LOG_DIR_RUN_VALIDATION,
 )
 from swesmith.harness.grading import get_valid_report
-from swesmith.harness.utils import run_patch_in_container, run_threadpool
+from swesmith.harness.utils import close_logger, run_patch_in_container, run_threadpool
 from swesmith.profiles import registry
 
 

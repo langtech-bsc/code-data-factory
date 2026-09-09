@@ -52,8 +52,8 @@ class TypeScriptProfile(RepoProfile):
         )
 
 
-def default_npm_install_dockerfile(mirror_name: str, node_version: str = "20") -> str:
-    """Default Dockerfile for TypeScript projects using npm."""
+def default_npm_install_recipe(mirror_name: str, node_version: str = "20") -> str:
+    """Default recipe for TypeScript projects using npm."""
     return f"""FROM node:{node_version}-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{mirror_name} /{ENV_NAME}
@@ -62,8 +62,8 @@ RUN npm install
 """
 
 
-def default_pnpm_install_dockerfile(mirror_name: str, node_version: str = "20") -> str:
-    """Default Dockerfile for TypeScript projects using pnpm."""
+def default_pnpm_install_recipe(mirror_name: str, node_version: str = "20") -> str:
+    """Default recipe for TypeScript projects using pnpm."""
     return f"""FROM node:{node_version}-bullseye
 RUN apt update && apt install -y git
 RUN npm install -g pnpm
@@ -81,7 +81,7 @@ class CrossEnv9951937a(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 RUN apt-get update && apt-get install -y git procps && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -101,7 +101,7 @@ class Trpc2f40ba93(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22
 RUN apt-get update && apt-get install -y git procps && rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm
@@ -122,38 +122,13 @@ class ClassValidator977d2c70(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 RUN apt-get update && apt-get install -y git procps && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
 WORKDIR /{ENV_NAME}
 RUN npm install
 """
-
-    def log_parser(self, log: str) -> dict[str, str]:
-        return parse_log_jest(log)
-
-
-@dataclass
-class NextChatc3b8c158(TypeScriptProfile):
-    owner: str = "ChatGPTNextWeb"
-    repo: str = "NextChat"
-    commit: str = "c3b8c1587c04fff05f7b42276a43016e87771527"
-    test_cmd: str = (
-        "node --no-warnings --experimental-vm-modules $(yarn bin jest) --ci --forceExit"
-    )
-
-    @property
-    def dockerfile(self):
-        return f"""FROM node:18-slim
-
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
-RUN git clone https://github.com/{self.mirror_name}.git /{ENV_NAME}
-WORKDIR /{ENV_NAME}
-RUN git submodule update --init --recursive
-RUN yarn install
-CMD ["/bin/bash"]"""
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -169,7 +144,7 @@ class Cherrystudiob767d6e2(TypeScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-alpine
 
 RUN apk add --no-cache git python3 make g++ gcc musl-dev
@@ -195,7 +170,7 @@ class CopilotKitfd993504(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -231,7 +206,7 @@ class RSSHubee161b72(TypeScriptProfile):
     test_cmd: str = "pnpm vitest run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22
 
 RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
@@ -255,7 +230,7 @@ class Dokploy1e7522d1(TypeScriptProfile):
     test_cmd: str = "pnpm --filter dokploy run test --run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -287,7 +262,7 @@ class Effect5df4da10(TypeScriptProfile):
     test_cmd: str = "pnpm vitest run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -317,7 +292,7 @@ class Fuelstsb3f37c91(TypeScriptProfile):
     test_cmd: str = "pnpm test:node"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN npm install -g pnpm@9.4.0
@@ -342,7 +317,7 @@ class FigmaContextMCPc7304173(TypeScriptProfile):
     test_cmd: str = "pnpm test -- src/tests/benchmark.test.ts"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -369,7 +344,7 @@ class Gitbook81f8ddcf(TypeScriptProfile):
     test_cmd: str = "bun run unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM oven/bun:1.3.7
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -394,7 +369,7 @@ class Reactselect052e864b(TypeScriptProfile):
     test_cmd: str = "npx jest --coverage --no-cache"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -419,7 +394,7 @@ class Metamaskextension5b029fa6(TypeScriptProfile):
     test_cmd: str = "yarn test:unit --ci --reporters=default --reporters=jest-junit --outputFile=test-results.xml"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:24
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -446,7 +421,7 @@ class NativeScript3d6a4392(TypeScriptProfile):
     test_cmd: str = "npx nx run-many --target=test --all --parallel=1 --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -471,7 +446,7 @@ class OpenCute84c0cfd(TypeScriptProfile):
     test_cmd: str = "bun test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM oven/bun:1.2.18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -496,7 +471,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "npm test --workspaces --if-present --parallel"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM node:20-slim
 
 # RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -521,7 +496,7 @@ class Folo62efdd29(TypeScriptProfile):
     test_cmd: str = "pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -547,7 +522,7 @@ class Rxjsc15b37f8(TypeScriptProfile):
     test_cmd: str = "yarn nx run rxjs:test --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -572,7 +547,7 @@ class Redocd41fd46f(TypeScriptProfile):
     test_cmd: str = "npm run unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -597,7 +572,7 @@ class Queryd6884583(TypeScriptProfile):
     test_cmd: str = "pnpm run test:ci"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -625,7 +600,7 @@ class Unleash120f50bc(TypeScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -658,7 +633,7 @@ class Million13406265(TypeScriptProfile):
     test_cmd: str = "pnpm vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -684,7 +659,7 @@ class SponsorBlockdfddffbc(TypeScriptProfile):
     test_cmd: str = "npx jest"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/{self.mirror_name}.git /{ENV_NAME}
@@ -706,7 +681,7 @@ class Bulletproofreact63f68340(TypeScriptProfile):
     test_cmd: str = "VITE_APP_API_URL=http://localhost:3000 yarn vitest run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -735,7 +710,7 @@ class Antdesignpro607e63f4(TypeScriptProfile):
     test_cmd: str = "npm test -- --ci --colors --no-cache"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -760,7 +735,7 @@ class Antdesignef322504(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -785,7 +760,7 @@ class G2e58f72b1(TypeScriptProfile):
     test_cmd: str = "npm test -- --reporter=default"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-alpine
 
 RUN apk add --no-cache git python3 make g++ build-base
@@ -810,7 +785,7 @@ class G691c0ac85(TypeScriptProfile):
     test_cmd: str = "pnpm -r test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y \
@@ -845,7 +820,7 @@ class Awscdk17f69d67(TypeScriptProfile):
     test_cmd: str = "cd packages/@aws-cdk/cx-api && yarn test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -878,7 +853,7 @@ class Backstagef2fc1def(TypeScriptProfile):
     test_cmd: str = "NODE_OPTIONS='--no-node-snapshot --experimental-vm-modules' yarn backstage-cli repo test --runInBand --no-cache --watchAll=false packages/errors"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bookworm-slim
 
 RUN apt-get update && apt-get install -y \
@@ -910,7 +885,7 @@ class Etchera79db1db(TypeScriptProfile):
     test_cmd: str = "npx mocha -r ts-node/register 'tests/shared/**/*.spec.ts' --reporter spec --timeout 10000"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -944,7 +919,7 @@ class Betterauth71a0297b(TypeScriptProfile):
     test_cmd: str = "pnpm test -- --reporter=default"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -971,7 +946,7 @@ class Socialappcbd48c85(TypeScriptProfile):
     test_cmd: str = "yarn jest --ci --forceExit --reporters=default --reporters=jest-junit --outputFile=test_output.txt"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1001,7 +976,7 @@ class Reactwindow2b982512(TypeScriptProfile):
     test_cmd: str = "pnpm run test:ci"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1026,7 +1001,7 @@ class UITARSdesktop3f254968(TypeScriptProfile):
     test_cmd: str = "pnpm test -- --run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1053,7 +1028,7 @@ class Calcom3c1d9068(TypeScriptProfile):
     test_cmd: str = "TZ=UTC yarn vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1080,7 +1055,7 @@ class Gitmoji72dd6f38(TypeScriptProfile):
     test_cmd: str = "pnpm turbo run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1104,7 +1079,7 @@ class Chakraui527a04c7(TypeScriptProfile):
     test_cmd: str = "pnpm test run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1129,7 +1104,7 @@ class Clineb5b503dd(TypeScriptProfile):
     test_cmd: str = "npm run test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bookworm-slim
 
 RUN apt-get update && apt-get install -y     git     python3     make     g++     pkg-config     libsqlite3-dev     bash     && rm -rf /var/lib/apt/lists/*
@@ -1156,7 +1131,7 @@ class Ohmyopencode976ffaeb(TypeScriptProfile):
     test_cmd: str = "bun test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM oven/bun:latest
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1181,7 +1156,7 @@ class Codeservere90504b8(TypeScriptProfile):
     test_cmd: str = "npm run test:unit -- --ci --colors --reporters=default"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bookworm-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1216,7 +1191,7 @@ class Editorjs90d6dec9(TypeScriptProfile):
     test_cmd: str = "xvfb-run yarn test:e2e"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y \
@@ -1254,7 +1229,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "pnpm run test"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM node:22-slim
 
 # RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1279,7 +1254,7 @@ class Continue437ac08a(TypeScriptProfile):
     test_cmd: str = "cd core && npx vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -1306,7 +1281,7 @@ class Commitlint5635cf0a(TypeScriptProfile):
     test_cmd: str = "yarn vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1331,7 +1306,7 @@ class Datefnsdd663983(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1357,7 +1332,7 @@ class Directusac922d18(TypeScriptProfile):
     test_cmd: str = "pnpm --recursive --filter '!tests-blackbox' test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -1383,7 +1358,7 @@ class Univercc701579(TypeScriptProfile):
     test_cmd: str = "pnpm test -- --passWithNoTests --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1409,7 +1384,7 @@ class Drizzleorma086f59f(TypeScriptProfile):
     test_cmd: str = "pnpm run test:types"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1456,7 +1431,7 @@ class Excalidrawf39ac4a6(TypeScriptProfile):
     test_cmd: str = "yarn test:app --watch=false"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1481,7 +1456,7 @@ class Fabricjs6742471c(TypeScriptProfile):
     test_cmd: str = "npm run test:vitest"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y     git     build-essential     libcairo2-dev     libpango1.0-dev     libjpeg-dev     libgif-dev     librsvg2-dev     && rm -rf /var/lib/apt/lists/*
@@ -1506,7 +1481,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "pnpm test --ci --coverage=false --testPathIgnorePatterns='none'"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM node:22
 
 # RUN apt-get update && apt-get install -y \
@@ -1556,7 +1531,7 @@ class Foam2cac8162(TypeScriptProfile):
     test_cmd: str = "xvfb-run -a yarn workspace foam-vscode test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y \
@@ -1588,7 +1563,7 @@ class Formbricks4b0c5186(TypeScriptProfile):
     test_cmd: str = "pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1617,7 +1592,7 @@ class Pangoline4d4c628(TypeScriptProfile):
     test_cmd: str = 'find server -name "*.test.ts" -exec npx tsx {} \\;'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:24-alpine
 
 RUN apk add --no-cache git curl tzdata python3 make g++
@@ -1648,7 +1623,7 @@ class Geminicli1b274b08(TypeScriptProfile):
     test_cmd: str = "npm run test:ci"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1681,7 +1656,7 @@ class Crystal65b3b40b(TypeScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1709,7 +1684,7 @@ class Hexo1fd997c3(TypeScriptProfile):
     test_cmd: str = "npm test -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1734,7 +1709,7 @@ class Homebridge3a341e08(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1759,7 +1734,7 @@ class Honof7d272ab(TypeScriptProfile):
     test_cmd: str = "bun run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM oven/bun:latest
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1784,7 +1759,7 @@ class Stimulus422eb81f(TypeScriptProfile):
     test_cmd: str = "yarn test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y \
@@ -1816,7 +1791,7 @@ class TwelveFactorAgentsd20c7283(TypeScriptProfile):
     test_cmd: str = "cd packages/walkthroughgen && npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make build-essential && rm -rf /var/lib/apt/lists/*
@@ -1843,7 +1818,7 @@ class InversifyJSfdd91868(TypeScriptProfile):
     test_cmd: str = "pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1873,7 +1848,7 @@ class Reactnativefirebase7df61307(TypeScriptProfile):
     test_cmd: str = "yarn jest --ci --colors 2>&1 | tee test_output.txt"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1900,7 +1875,7 @@ class Ioniconsa9d1b7e2(TypeScriptProfile):
     test_cmd: str = "npm run test.spec -- --ci --no-cache --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1923,7 +1898,7 @@ class NextjsBoilerplate503d2665(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1948,7 +1923,7 @@ class Sigmajs13062dc5(TypeScriptProfile):
     test_cmd: str = "npm run test:unit --workspace=@sigma/test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git python3 build-essential libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpango-1.0-0 libcairo2 && rm -rf /var/lib/apt/lists/*
@@ -1974,7 +1949,7 @@ class Janaffbde58(TypeScriptProfile):
     test_cmd: str = "yarn test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bookworm
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2003,7 +1978,7 @@ class Formik91475adb(TypeScriptProfile):
     test_cmd: str = "yarn test -- --no-cache --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2028,7 +2003,7 @@ class Jest905bcbce(TypeScriptProfile):
     test_cmd: str = "yarn jest --ci"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2055,7 +2030,7 @@ class FastGPTcfded3af(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2082,7 +2057,7 @@ class Langchainjs41bfea51(TypeScriptProfile):
     test_cmd: str = "pnpm test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2109,7 +2084,7 @@ class Lerna215ff002(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2132,7 +2107,7 @@ class Lobehubc576a13a(TypeScriptProfile):
     test_cmd: str = "pnpm run test-app"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2159,7 +2134,7 @@ class Mapboxgljs9236fbb0(TypeScriptProfile):
     test_cmd: str = "npm run test-unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y \
@@ -2195,7 +2170,7 @@ class Markmap205367a2(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2220,7 +2195,7 @@ class Reactadmin823caa0b(TypeScriptProfile):
     test_cmd: str = "yarn test-unit-ci"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bullseye-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -2247,7 +2222,7 @@ class Aipdfchatbotlangchain4bb98092(TypeScriptProfile):
     test_cmd: str = "yarn workspace backend jest --testPathIgnorePatterns integration.test.ts state.test.ts --passWithNoTests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git jq && rm -rf /var/lib/apt/lists/*
@@ -2276,7 +2251,7 @@ class Medusa3eb69ebd(TypeScriptProfile):
     test_cmd: str = "yarn jest --ci --colors --maxWorkers=2 packages/medusa/src"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -2308,7 +2283,7 @@ class TypeScript0a74ec4e(TypeScriptProfile):
     test_cmd: str = "npx hereby runtests-parallel --light=true --reporter=spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2344,7 +2319,7 @@ class Vscode4166e90a(TypeScriptProfile):
     test_cmd: str = "npm run compile && ./node_modules/.bin/mocha test/unit/node/index.js --delay --ui=tdd --timeout=5000 --exit --reporter mocha-junit-reporter --reporter-options mochaFile=./test-results.xml || true"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -2379,7 +2354,7 @@ class Losslesscut26013077(TypeScriptProfile):
     test_cmd: str = "yarn test run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y \
@@ -2421,7 +2396,7 @@ class Msw3a7b4510(TypeScriptProfile):
     test_cmd: str = "pnpm test:unit --run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2448,7 +2423,7 @@ class N8ncfd59cc5(TypeScriptProfile):
     test_cmd: str = "pnpm turbo run test --filter=n8n-workflow --filter=n8n-core -- --reporter=default --reporter=junit --outputFile=results.xml"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye-slim
 
 RUN apt-get update && apt-get install -y \
@@ -2481,7 +2456,7 @@ class Nanobrowser322384f8(TypeScriptProfile):
     test_cmd: str = "pnpm -F chrome-extension test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2506,7 +2481,7 @@ class Nest346c9543(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -2531,7 +2506,7 @@ class Nx4f02c6b5(TypeScriptProfile):
     test_cmd: str = "pnpm nx test nx --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-alpine
 
 RUN apk add --no-cache \
@@ -2569,7 +2544,7 @@ class Nuxt06533105(TypeScriptProfile):
     test_cmd: str = "pnpm test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -2597,7 +2572,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "pnpm exec vitest run --config vitest.unit.config.ts"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM node:20-slim
 
 # RUN apt-get update && apt-get install -y git python3 make g++ pkg-config libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev && rm -rf /var/lib/apt/lists/*
@@ -2624,7 +2599,7 @@ class Newsnow951241bf(TypeScriptProfile):
     test_cmd: str = "pnpm exec vitest run -c vitest.config.ts"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm@10.14.0
@@ -2646,7 +2621,7 @@ class Payload8f660355(TypeScriptProfile):
     test_cmd: str = "pnpm run test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2673,7 +2648,7 @@ class Drawnixa046d152(TypeScriptProfile):
     test_cmd: str = "npx nx run-many -t test --no-cloud --skip-nx-cache"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2698,7 +2673,7 @@ class Reactspring2ff6de7a(TypeScriptProfile):
     test_cmd: str = "yarn test:unit --ci --colors=false"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-bullseye
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -2723,7 +2698,7 @@ class Reactthreefiber9525ea0d(TypeScriptProfile):
     test_cmd: str = "yarn test --ci --no-cache --colors false"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2748,7 +2723,7 @@ class Zustand99379a6e(TypeScriptProfile):
     test_cmd: str = "pnpm run test:spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2773,7 +2748,7 @@ class Pnpm47e85018(TypeScriptProfile):
     test_cmd: str = "pnpm run prepare-fixtures"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -2806,7 +2781,7 @@ class Prismaf6b1ac64(TypeScriptProfile):
     test_cmd: str = "cd packages/get-platform && pnpm exec jest --ci --reporters=default --reporters=jest-junit --outputFile=test_output.xml"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2835,7 +2810,7 @@ class Tsx3a3a0071(TypeScriptProfile):
     test_cmd: str = "node ./dist/cli.mjs tests/index.ts"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-alpine
 
 RUN apk add --no-cache git python3 make g++ build-base
@@ -2862,7 +2837,7 @@ class Puppeteerf4c9feef(TypeScriptProfile):
     test_cmd: str = "npm run unit -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -2928,7 +2903,7 @@ class Primitives90751370(TypeScriptProfile):
     test_cmd: str = "pnpm run test --run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -2955,7 +2930,7 @@ class Reacthookform3adba2b8(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2980,7 +2955,7 @@ class Readest9cd88fe8(TypeScriptProfile):
     test_cmd: str = "cd apps/readest-app && npx vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -3025,7 +3000,7 @@ class Recharts5108cfdf(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3050,7 +3025,7 @@ class Noderedised55918a(TypeScriptProfile):
     test_cmd: str = "npm test -ws --if-present"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -3075,7 +3050,7 @@ class Reduxthunk184205d4(TypeScriptProfile):
     test_cmd: str = "yarn vitest --run --typecheck"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3100,7 +3075,7 @@ class Redux849c8ce5(TypeScriptProfile):
     test_cmd: str = "yarn vitest --run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3127,7 +3102,7 @@ class Refinedgithubd4a7c3fb(TypeScriptProfile):
     test_cmd: str = "npm run vitest"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3152,7 +3127,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "pnpm test:all"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM node:20-slim
 
 # RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -3179,7 +3154,7 @@ class Reactrouter445eacd5(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3208,7 +3183,7 @@ class Rete2aae1995(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3231,7 +3206,7 @@ class Ui28ebf1b8(TypeScriptProfile):
     test_cmd: str = "pnpm vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -3258,7 +3233,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "npm test"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM node:20
 
 # RUN apt-get update && apt-get install -y git python3 make g++ curl && rm -rf /var/lib/apt/lists/*
@@ -3292,7 +3267,7 @@ class Kyeb5c3eba(TypeScriptProfile):
     test_cmd: str = "npm run build && npx ava --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -3339,7 +3314,7 @@ class Typefest051325ac(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3364,7 +3339,7 @@ class Solida0524c06(TypeScriptProfile):
     test_cmd: str = "pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3390,7 +3365,7 @@ class FossFLOWdaa0dd3b(TypeScriptProfile):
     test_cmd: str = "npm test --workspaces --if-present"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3415,7 +3390,7 @@ class Xstate1710ace0(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3441,7 +3416,7 @@ class Strapie5b87a54(TypeScriptProfile):
     test_cmd: str = "yarn test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -3472,7 +3447,7 @@ class Reactuse9ef95352(TypeScriptProfile):
     test_cmd: str = "yarn jest --maxWorkers 2 --ci --reporters=default"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3497,7 +3472,7 @@ class Styledcomponents2bd64021(TypeScriptProfile):
     test_cmd: str = "pnpm --filter styled-components test -- --no-cache --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN npm install -g pnpm@10.0.0
@@ -3521,7 +3496,7 @@ class Signaturepad43989b6d(TypeScriptProfile):
     test_cmd: str = "yarn test --no-cache --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3546,7 +3521,7 @@ class Tailwindcssdf96ea5e(TypeScriptProfile):
     test_cmd: str = "cargo test -- --nocapture"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -3587,7 +3562,7 @@ class Bit2d92cae7(TypeScriptProfile):
     test_cmd: str = "cross-env NODE_OPTIONS=--no-warnings ./node_modules/.bin/mocha --require ./babel-register './e2e/**/*.e2e*.ts' --reporter spec --timeout 10000 --exit || true; echo '999 passing (1ms)'"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -3619,31 +3594,6 @@ CMD ["/bin/bash"]"""
 
 
 @dataclass
-class Claudemem1341e93f(TypeScriptProfile):
-    owner: str = "thedotmack"
-    repo: str = "claude-mem"
-    commit: str = "1341e93fcab15b9caf48bc947d8521b4a97515d8"
-    test_cmd: str = "bun test"
-
-    @property
-    def dockerfile(self):
-        return f"""FROM oven/bun:1.1-slim
-
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
-RUN git clone https://github.com/{self.mirror_name}.git /{ENV_NAME}
-WORKDIR /{ENV_NAME}
-RUN git submodule update --init --recursive
-
-RUN bun install
-
-CMD ["/bin/bash"]"""
-
-    def log_parser(self, log: str) -> dict[str, str]:
-        return parse_log_jest(log)
-
-
-@dataclass
 class Tinacmsdffb104f(TypeScriptProfile):
     owner: str = "tinacms"
     repo: str = "tinacms"
@@ -3651,7 +3601,7 @@ class Tinacmsdffb104f(TypeScriptProfile):
     test_cmd: str = "pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -3678,7 +3628,7 @@ class Tldraw9b55464f(TypeScriptProfile):
     test_cmd: str = "yarn vitest run --reporter=verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -3703,7 +3653,7 @@ class Uppy89fbbc72(TypeScriptProfile):
     test_cmd: str = "yarn workspace @uppy/core test --run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -3734,7 +3684,7 @@ class Tremornpm7613bff6(TypeScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3763,7 +3713,7 @@ class Trpc5845dc28(TypeScriptProfile):
     test_cmd: str = "pnpm test -- --run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3790,7 +3740,7 @@ class Typescripteslint8a95834b(TypeScriptProfile):
     test_cmd: str = "export NX_DAEMON=false && pnpm run build && pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3818,7 +3768,7 @@ class Classvalidator977d2c70(TypeScriptProfile):
     test_cmd: str = "npm run test:ci"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3843,7 +3793,7 @@ class Tiptap2d6de06c(TypeScriptProfile):
     test_cmd: str = "pnpm run test:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN npm install -g pnpm@9.15.4
@@ -3868,7 +3818,7 @@ class Umami860e6390(TypeScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -3893,7 +3843,7 @@ class Qiankun693cdde7(TypeScriptProfile):
     test_cmd: str = "pnpm -r run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3918,7 +3868,7 @@ class Inke8b08e75(TypeScriptProfile):
     test_cmd: str = "FORCE_COLOR=true ./node_modules/.bin/ava --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN git clone https://github.com/{self.mirror_name}.git /{ENV_NAME}
@@ -3942,7 +3892,7 @@ class Satori6203e870(TypeScriptProfile):
     test_cmd: str = "pnpm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y \
@@ -3978,7 +3928,7 @@ class Verdacciocda2467f(TypeScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -4004,7 +3954,7 @@ class Vite8b47ff76(TypeScriptProfile):
     test_cmd: str = "pnpm run test-unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -4032,7 +3982,7 @@ class Void17e7a5b1(TypeScriptProfile):
     test_cmd: str = "npm run test-node"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -4072,7 +4022,7 @@ class Xyflow39ff6e94(TypeScriptProfile):
     test_cmd: str = "pnpm run typecheck"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*

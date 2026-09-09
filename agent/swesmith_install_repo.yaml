@@ -28,7 +28,6 @@ agent:
   tools:
     bundles:
       - path: tools/registry
-      - path: tools/edit_anthropic
       - path: tools/submit
     registry_variables:
       USE_FILEMAP: 'true'
@@ -40,8 +39,8 @@ agent:
     - type: cache_control
       last_n_messages: 2
   model:
-    name: claude-3-7-sonnet-20250219
-    api_key: $CLAUDE_API_KEY_ROTATION
+    name: glm-5.3-flash
+    api_base: http://127.0.0.1:8000/v1
     per_instance_cost_limit: 2.
     per_instance_call_limit: 150
     delay: 1

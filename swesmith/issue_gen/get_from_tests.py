@@ -1,37 +1,25 @@
 """
 Purpose: Given a task instance, use the execution output of running tests as issue text.
 
-python swesmith/issue_gen/get_from_tests.py logs/experiments/*.json \
+uv run python swesmith/issue_gen/get_from_tests.py logs/experiments/*.json \
     --config_file configs/issue_gen/ig_tests.yaml \
-    --model anthropic/claude-3-7-sonnet-20250219 \
+    --model glm-5.3-flash \
     --n_workers 1
 """
 
 import argparse
-import docker
-import litellm
 import json
 import random
-import subprocess
+import shlex
+import shutil
 import yaml
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datasets import load_dataset
-from litellm import completion, completion_cost
 from pathlib import Path
-from swebench.harness.constants import (
-    DOCKER_USER,
-    DOCKER_WORKDIR,
-    FAIL_TO_PASS,
-    KEY_INSTANCE_ID,
-)
-from swebench.harness.docker_utils import (
-    cleanup_container,
-    copy_to_container,
-    exec_run_with_timeout,
-)
+from swesmith.harness.constants import FAIL_TO_PASS
 from swesmith.constants import (
-    KEY_IMAGE_NAME,
+    KEY_INSTANCE_ID,
     LOG_DIR_ISSUE_GEN,
     TEST_OUTPUT_END,
     TEST_OUTPUT_START,
@@ -39,11 +27,10 @@ from swesmith.constants import (
 from swesmith.issue_gen.utils import get_test_function
 from swesmith.profiles import RepoProfile, registry
 from swesmith.profiles.python import PythonProfile
+from swesmith.runtime.singularity import SingularityRunner, make_workspace
+from swesmith.llm import complete
 from tqdm.auto import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
-
-litellm.drop_params = True
-litellm.suppress_debug_info = True
 
 LOG_FILE_ISSUE = "issue_test.txt"
 LOG_FILE_METADATA = "metadata_test.json"
@@ -83,55 +70,29 @@ def get_verbose_test_cmd(instance: dict, rp: RepoProfile, test_idx: int | None =
 
 def run_command_in_container(instance: dict, command: str, rp: RepoProfile):
     """
-    Run a command in a docker container.
+    Run a command in an isolated Singularity workspace.
     """
-    container = None
-    client = docker.from_env()
     instance_id = instance[KEY_INSTANCE_ID]
-    image_name = instance[KEY_IMAGE_NAME]
-
-    # Start docker container
-    container_name = f"swesmith.inst_gen.{instance_id}"
-    container = client.containers.create(
-        image=image_name,
-        name=container_name,
-        user=DOCKER_USER,
-        detach=True,
-        command="tail -f /dev/null",
-        platform="linux/x86_64",
-        mem_limit="10g",
-    )
-    container.start()
-
-    # Set up command run script
-    eval_file = Path(f"eval_{instance_id}.sh")
-    eval_file.write_text(
-        "\n".join(
+    rp.require_image()
+    workspace_root = make_workspace(prefix=f"swesmith-issue-{instance_id}-")
+    workspace = workspace_root / "repo"
+    try:
+        rp.clone(dest=str(workspace))
+        runner = SingularityRunner(rp.image_path, workspace)
+        script = "\n".join(
             [
-                "#!/bin/bash",
                 "set -uxo pipefail",
-                f"cd {DOCKER_WORKDIR}",
                 "git fetch",
-                f"git checkout {instance[KEY_INSTANCE_ID]}",
-                f": '{TEST_OUTPUT_START}'",
+                f"git checkout {shlex.quote(instance_id)}",
+                f": {shlex.quote(TEST_OUTPUT_START)}",
                 command,
-                f": '{TEST_OUTPUT_END}'",
+                f": {shlex.quote(TEST_OUTPUT_END)}",
             ]
         )
-    )
-    copy_to_container(container, eval_file, Path("/eval.sh"))
-    eval_file.unlink()
-
-    # Checkout the commit corresponding to the bug + run testing command
-    container.exec_run("git fetch", workdir=DOCKER_WORKDIR, user=DOCKER_USER)
-    container.exec_run(
-        f"git checkout {instance['instance_id']}",
-        workdir=DOCKER_WORKDIR,
-        user=DOCKER_USER,
-    )
-    test_output, _, _ = exec_run_with_timeout(
-        container, "/bin/bash /eval.sh", timeout=rp.timeout
-    )
+        result = runner.exec_run(f"bash -lc {shlex.quote(script)}", timeout=rp.timeout)
+        test_output = result.output.decode(errors="replace")
+    finally:
+        shutil.rmtree(workspace_root, ignore_errors=True)
     start_idx = test_output.find(TEST_OUTPUT_START) + len(TEST_OUTPUT_START)
     end_idx = test_output.find(TEST_OUTPUT_END)
     lines = [
@@ -140,7 +101,6 @@ def run_command_in_container(instance: dict, command: str, rp: RepoProfile):
         if x.strip() != command.strip()
     ]
     test_output = "\n".join(lines[1:-1])
-    cleanup_container(client, container, "quiet")
     return test_output
 
 
@@ -197,7 +157,7 @@ def _process_instance(instance: dict, config_file: str | None, model: str | None
                 "role": "user",
             },
         ]
-        response = completion(model=model, messages=messages, n=1, temperature=0)
+        response = complete(model=model, messages=messages, n=1, temperature=0)
         generated = response.choices[0].message.content
 
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -209,7 +169,7 @@ def _process_instance(instance: dict, config_file: str | None, model: str | None
                 "test_output": test_output,
                 "test_src": test_src,
                 "generated": generated,
-                "cost": completion_cost(response) if generated else 0,
+                "cost": 0,
             },
             f,
             indent=2,
@@ -259,7 +219,7 @@ def main(dataset_path: str, config_file: str | None, model: str | None, n_worker
         print(f"Interrupted. Removing {len(repos_to_remove)} repos")
         if len(repos_to_remove) > 0:
             for repo in repos_to_remove:
-                subprocess.run(f"rm -rf {repo}", shell=True)
+                shutil.rmtree(repo, ignore_errors=True)
         return
 
     # Attach issues to dataset
@@ -284,7 +244,7 @@ def main(dataset_path: str, config_file: str | None, model: str | None, n_worker
     if len(repos_to_remove) > 0:
         print(f"Removing {len(repos_to_remove)} repos")
         for repo in repos_to_remove:
-            subprocess.run(f"rm -rf {repo}", shell=True)
+            shutil.rmtree(repo, ignore_errors=True)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,9 @@
 import json
 
-from swebench.harness.constants import (
-    KEY_INSTANCE_ID,
-    KEY_MODEL,
-    KEY_PREDICTION,
+from swesmith.harness.constants import (
     TestStatus,
 )
+from swesmith.constants import KEY_INSTANCE_ID, KEY_MODEL, KEY_PREDICTION
 from swesmith.harness import grading
 
 

@@ -3,13 +3,12 @@ import re
 import shutil
 
 from dataclasses import dataclass, field
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     TestStatus,
 )
-from swesmith.constants import ENV_NAME
+from swesmith.constants import ENV_NAME, KEY_INSTANCE_ID
 from swesmith.profiles.base import RepoProfile, registry
 
 
@@ -109,7 +108,7 @@ class Dbalacb68b38(PhpProfile):
     commit: str = "acb68b388b2577bb211bb26dc22d20a8ad93d97d"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM php:8.3
 RUN apt-get update && \
     apt-get install -y wget git build-essential unzip libgd-dev libzip-dev libgmp-dev libftp-dev libcurl4-openssl-dev libpq-dev libsqlite3-dev && \
@@ -169,7 +168,7 @@ class Guzzlefb92d95f(PhpProfile):
     commit: str = "fb92d95f80a9da51bf8f2a5b26d8e8ea3b6d99ed"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM php:8.3
 RUN apt-get update && \
     apt-get install -y git unzip libcurl4-openssl-dev libzip-dev nodejs npm && \
@@ -193,7 +192,7 @@ class Monolog6db20ca0(PhpProfile):
     commit: str = "6db20ca029219dd8de378cea8e32ee149399ef1b"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM php:8.3
 RUN apt-get update && \
     apt-get install -y git unzip libcurl4-openssl-dev && \

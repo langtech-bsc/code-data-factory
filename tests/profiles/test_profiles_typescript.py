@@ -14,11 +14,11 @@ from swesmith.profiles.typescript import (
     Trpc2f40ba93,
     ClassValidator977d2c70,
     Rxjsc15b37f8,
-    default_npm_install_dockerfile,
-    default_pnpm_install_dockerfile,
+    default_npm_install_recipe,
+    default_pnpm_install_recipe,
 )
 from swesmith.constants import ENV_NAME
-from swebench.harness.constants import TestStatus as Status
+from swesmith.harness.constants import TestStatus as Status
 
 
 # =============================================================================
@@ -36,7 +36,7 @@ def make_dummy_ts_profile():
         test_cmd = "npm test"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM node:20\nRUN echo hello"
 
         def log_parser(self, log: str) -> dict[str, str]:
@@ -70,28 +70,28 @@ def test_ts_profile_extract_entities_default_excludes():
 
 
 # =============================================================================
-# Default Dockerfile Helper Tests
+# Default recipe Helper Tests
 # =============================================================================
 
 
-def test_default_npm_install_dockerfile():
-    """Test default_npm_install_dockerfile generates correct Dockerfile."""
-    result = default_npm_install_dockerfile("org/repo__name.abc12345")
+def test_default_npm_install_recipe():
+    """Test default_npm_install_recipe generates correct recipe."""
+    result = default_npm_install_recipe("org/repo__name.abc12345")
     assert "FROM node:20-bullseye" in result
     assert "git clone https://github.com/org/repo__name.abc12345" in result
     assert f"/{ENV_NAME}" in result
     assert "npm install" in result
 
 
-def test_default_npm_install_dockerfile_custom_node():
-    """Test default_npm_install_dockerfile with custom node version."""
-    result = default_npm_install_dockerfile("org/repo", node_version="18")
+def test_default_npm_install_recipe_custom_node():
+    """Test default_npm_install_recipe with custom node version."""
+    result = default_npm_install_recipe("org/repo", node_version="18")
     assert "FROM node:18-bullseye" in result
 
 
-def test_default_pnpm_install_dockerfile():
-    """Test default_pnpm_install_dockerfile generates correct Dockerfile."""
-    result = default_pnpm_install_dockerfile("org/repo__name.abc12345")
+def test_default_pnpm_install_recipe():
+    """Test default_pnpm_install_recipe generates correct recipe."""
+    result = default_pnpm_install_recipe("org/repo__name.abc12345")
     assert "FROM node:20-bullseye" in result
     assert "npm install -g pnpm" in result
     assert "git clone https://github.com/org/repo__name.abc12345" in result
@@ -99,9 +99,9 @@ def test_default_pnpm_install_dockerfile():
     assert "pnpm install" in result
 
 
-def test_default_pnpm_install_dockerfile_custom_node():
-    """Test default_pnpm_install_dockerfile with custom node version."""
-    result = default_pnpm_install_dockerfile("org/repo", node_version="22")
+def test_default_pnpm_install_recipe_custom_node():
+    """Test default_pnpm_install_recipe with custom node version."""
+    result = default_pnpm_install_recipe("org/repo", node_version="22")
     assert "FROM node:22-bullseye" in result
 
 
@@ -119,13 +119,13 @@ def test_crossenv_profile_properties():
     assert profile.test_cmd == "npm test"
 
 
-def test_crossenv_profile_dockerfile():
-    """Test CrossEnv9951937a Dockerfile content."""
+def test_crossenv_profile_recipe():
+    """Test CrossEnv9951937a recipe content."""
     profile = CrossEnv9951937a()
-    dockerfile = profile.dockerfile
-    assert "FROM node:18-slim" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "npm install" in dockerfile
+    recipe = profile.recipe
+    assert "FROM node:18-slim" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "npm install" in recipe
 
 
 def test_crossenv_profile_log_parser():
@@ -149,14 +149,14 @@ def test_trpc_profile_properties():
     assert profile.test_cmd == "pnpm test"
 
 
-def test_trpc_profile_dockerfile():
-    """Test Trpc2f40ba93 Dockerfile content."""
+def test_trpc_profile_recipe():
+    """Test Trpc2f40ba93 recipe content."""
     profile = Trpc2f40ba93()
-    dockerfile = profile.dockerfile
-    assert "FROM node:22" in dockerfile
-    assert "pnpm" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "pnpm install" in dockerfile
+    recipe = profile.recipe
+    assert "FROM node:22" in recipe
+    assert "pnpm" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "pnpm install" in recipe
 
 
 def test_trpc_profile_log_parser():
@@ -178,13 +178,13 @@ def test_classvalidator_profile_properties():
     assert profile.test_cmd == "npm test"
 
 
-def test_classvalidator_profile_dockerfile():
-    """Test ClassValidator977d2c70 Dockerfile content."""
+def test_classvalidator_profile_recipe():
+    """Test ClassValidator977d2c70 recipe content."""
     profile = ClassValidator977d2c70()
-    dockerfile = profile.dockerfile
-    assert "FROM node:18-slim" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "npm install" in dockerfile
+    recipe = profile.recipe
+    assert "FROM node:18-slim" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "npm install" in recipe
 
 
 def test_classvalidator_profile_log_parser():
@@ -210,14 +210,14 @@ def test_rxjs_profile_properties():
     assert "yarn" in profile.test_cmd
 
 
-def test_rxjs_profile_dockerfile():
-    """Test Rxjsc15b37f8 Dockerfile content."""
+def test_rxjs_profile_recipe():
+    """Test Rxjsc15b37f8 recipe content."""
     profile = Rxjsc15b37f8()
-    dockerfile = profile.dockerfile
-    assert "FROM node:20-slim" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "git submodule update --init --recursive" in dockerfile
-    assert "yarn install" in dockerfile
+    recipe = profile.recipe
+    assert "FROM node:20-slim" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "git submodule update --init --recursive" in recipe
+    assert "yarn install" in recipe
 
 
 def test_rxjs_profile_log_parser():
@@ -252,12 +252,12 @@ def test_ts_profile_inheritance_in_concrete_profiles():
         assert hasattr(profile, "repo")
         assert hasattr(profile, "commit")
         assert hasattr(profile, "test_cmd")
-        assert hasattr(profile, "dockerfile")
+        assert hasattr(profile, "recipe")
         assert hasattr(profile, "log_parser")
 
 
-def test_all_profiles_have_mirror_name_in_dockerfile():
-    """Test that all concrete profiles use mirror_name (not owner/repo) in dockerfiles."""
+def test_all_profiles_have_mirror_name_in_recipe():
+    """Test that all concrete profiles use mirror_name (not owner/repo) in recipes."""
     profiles_to_test = [
         CrossEnv9951937a,
         Trpc2f40ba93,
@@ -267,9 +267,9 @@ def test_all_profiles_have_mirror_name_in_dockerfile():
 
     for profile_class in profiles_to_test:
         profile = profile_class()
-        dockerfile = profile.dockerfile
-        assert profile.mirror_name in dockerfile, (
-            f"{profile_class.__name__} dockerfile should contain mirror_name"
+        recipe = profile.recipe
+        assert profile.mirror_name in recipe, (
+            f"{profile_class.__name__} recipe should contain mirror_name"
         )
 
 
@@ -278,70 +278,10 @@ def test_all_profiles_have_mirror_name_in_dockerfile():
 # =============================================================================
 
 
-def test_ts_profile_build_image():
-    """Test TypeScriptProfile.build_image writes Dockerfile and runs docker."""
+def test_ts_profile_build_image_uses_singularity_builder():
     profile = CrossEnv9951937a()
-
-    with (
-        patch("pathlib.Path.mkdir") as mock_mkdir,
-        patch("builtins.open", mock_open()) as mock_file,
-        patch("subprocess.run") as mock_run,
-    ):
+    with patch.object(profile, "_build_sif") as build_sif:
         profile.build_image()
 
-        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
-        mock_file.assert_called()
-        mock_run.assert_called_once()
-        call_args = mock_run.call_args
-        assert "docker build" in call_args[0][0]
-        assert profile.image_name in call_args[0][0]
-
-
-def test_ts_profile_build_image_error_handling():
-    """Test build_image error handling."""
-    profile = CrossEnv9951937a()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch(
-            "subprocess.run",
-            side_effect=subprocess.CalledProcessError(1, "docker build"),
-        ),
-    ):
-        with pytest.raises(subprocess.CalledProcessError):
-            profile.build_image()
-
-
-def test_ts_profile_build_image_checks_exit_code():
-    """Test build_image checks subprocess exit code."""
-    profile = CrossEnv9951937a()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch("subprocess.run") as mock_run,
-    ):
-        profile.build_image()
-        assert mock_run.call_args.kwargs["check"] is True
-
-
-def test_ts_profile_build_image_file_operations():
-    """Test build_image creates Dockerfile and build log."""
-    profile = CrossEnv9951937a()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()) as mock_file,
-        patch("subprocess.run"),
-    ):
-        profile.build_image()
-
-        file_calls = mock_file.call_args_list
-        assert len(file_calls) >= 2
-
-        dockerfile_calls = [call for call in file_calls if "Dockerfile" in str(call)]
-        assert len(dockerfile_calls) > 0
-
-        log_calls = [call for call in file_calls if "build_image.log" in str(call)]
-        assert len(log_calls) > 0
+    build_sif.assert_called_once()
+    assert "FROM node:18-slim" in build_sif.call_args.args[0]

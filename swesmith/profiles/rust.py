@@ -3,13 +3,12 @@ import re
 import shutil
 
 from dataclasses import dataclass, field
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     TestStatus,
 )
-from swesmith.constants import ENV_NAME
+from swesmith.constants import ENV_NAME, KEY_INSTANCE_ID
 from swesmith.profiles.base import RepoProfile, registry
 
 
@@ -144,7 +143,7 @@ class RustProfile(RepoProfile):
         return test_status_map
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM rust:{self.rust_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -252,7 +251,7 @@ class Html5everb93afc94(RustProfile):
     commit: str = "b93afc9484cf5de40b422a44f9cea86ab371e3ee"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM rust:1.88
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -298,7 +297,7 @@ class Ripgrep3b7fd442(RustProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM rust:1.88
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -558,7 +557,7 @@ class TokenizersEcad3f18(RustProfile):
     test_cmd: str = f"cd ~/{ENV_NAME}/tokenizers && cargo test --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM rust:{self.rust_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC

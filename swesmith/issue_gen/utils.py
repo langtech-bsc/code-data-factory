@@ -4,7 +4,7 @@ import random
 from typing import Any
 
 from pathlib import Path
-from swebench.harness.constants import FAIL_TO_PASS
+from swesmith.harness.constants import FAIL_TO_PASS
 from swesmith.profiles import registry
 
 

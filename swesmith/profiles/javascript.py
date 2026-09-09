@@ -3,13 +3,12 @@ import re
 import shutil
 
 from dataclasses import dataclass, field
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     TestStatus,
 )
-from swesmith.constants import ENV_NAME, KEY_PATCH
+from swesmith.constants import ENV_NAME, KEY_INSTANCE_ID, KEY_PATCH
 from swesmith.profiles.base import RepoProfile, registry
 from swesmith.profiles.utils import X11_DEPS
 from unidiff import PatchSet
@@ -151,7 +150,7 @@ class JavaScriptProfile(RepoProfile):
         )
 
 
-def default_npm_install_dockerfile(mirror_url: str, node_version: str = "18") -> str:
+def default_npm_install_recipe(mirror_url: str, node_version: str = "18") -> str:
     return f"""FROM node:{node_version}-bullseye
 RUN apt update && apt install -y git
 RUN git clone {mirror_url} /{ENV_NAME}
@@ -329,7 +328,7 @@ class ReactPDFee5c96b8(JavaScriptProfile):
     test_cmd: str = "./node_modules/.bin/vitest --no-color --reporter verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bullseye
 RUN apt update && apt install -y pkg-config build-essential libpixman-1-0 libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -362,7 +361,7 @@ class Markeddbf29d91(JavaScriptProfile):
     test_cmd: str = "NO_COLOR=1 node --test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:24-bullseye
 RUN apt update && apt install -y git {X11_DEPS}
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -399,7 +398,7 @@ class Babel2ea3fc8f(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -430,8 +429,8 @@ class GithubReadmeStats3e974011(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url)
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url)
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -445,8 +444,8 @@ class Mongoose5f57a5bb(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url)
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url)
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_mocha(log)
@@ -463,8 +462,8 @@ class Axiosef36347f(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url)
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url)
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_mocha(log)
@@ -478,8 +477,8 @@ class Async23dbf76a(JavaScriptProfile):
     test_cmd: str = "npm run mocha-node-test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url)
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url)
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_mocha(log)
@@ -493,8 +492,8 @@ class Expressef5f2e13(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url)
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url)
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_mocha(log)
@@ -508,8 +507,8 @@ class Dayjsc8a26460(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url)
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url)
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -523,7 +522,7 @@ class Svelte6c9717a9(JavaScriptProfile):
     test_cmd: str = "pnpm test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-bullseye
 RUN apt update && apt install -y git
 RUN npm install -g pnpm@10.4.0
@@ -546,8 +545,8 @@ class Commanderjs395cf714(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url, node_version="20")
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url, node_version="20")
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -561,7 +560,7 @@ class Wretch661865a6(JavaScriptProfile):
     test_cmd: str = "npm run test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -582,7 +581,7 @@ class Html5Boilerplateac08a17c(JavaScriptProfile):
     test_cmd: str = "npm run test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -605,7 +604,7 @@ class HighlightJS5697ae51(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -629,7 +628,7 @@ class Prism31b467fa(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -650,7 +649,7 @@ class ChromaJS498427ea(JavaScriptProfile):
     test_cmd: str = "npm run test -- --run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-bullseye
 RUN apt update && apt install -y git
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -676,8 +675,8 @@ class Colorfef7b619(JavaScriptProfile):
         return f"{self.org_dh}/swesmith.{self.arch}.{self.owner.replace('-', '_')}_1776_{self.repo}.{self.commit[:8]}".lower()
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url, node_version="22")
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url, node_version="22")
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_mocha(log)
@@ -691,8 +690,8 @@ class Qd180f4a0(JavaScriptProfile):
     test_cmd: str = "npm run test -- --verbose --reporter spec"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url, node_version="22")
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url, node_version="22")
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_mocha(log)
@@ -709,8 +708,8 @@ class ImmutableJS879adab5(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url, node_version="22")
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url, node_version="22")
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -727,8 +726,8 @@ class ThreeJS73b3f248(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url, node_version="22")
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url, node_version="22")
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -742,8 +741,8 @@ class Echarts6be0e145(JavaScriptProfile):
     test_cmd: str = "npm run test -- --verbose"
 
     @property
-    def dockerfile(self):
-        return default_npm_install_dockerfile(self.mirror_url, node_version="22")
+    def recipe(self):
+        return default_npm_install_recipe(self.mirror_url, node_version="22")
 
     def log_parser(self, log: str) -> dict[str, str]:
         return parse_log_jest(log)
@@ -757,7 +756,7 @@ class Draggable8a1eed57(JavaScriptProfile):
     test_cmd: str = "yarn test --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 
@@ -780,7 +779,7 @@ class Reactslick97442318(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 # Install system dependencies
@@ -809,7 +808,7 @@ class Pdfmake719e7314(JavaScriptProfile):
     test_cmd: str = "npm run test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 # Install system dependencies
@@ -839,7 +838,7 @@ class Multerb6e4b1f6(JavaScriptProfile):
     test_cmd: str = "npm test -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -859,7 +858,7 @@ class Pdfkitd0108157(JavaScriptProfile):
     test_cmd: str = "yarn test --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 # Install system dependencies
@@ -899,7 +898,7 @@ class Mathjs04e6e2d7(JavaScriptProfile):
     test_cmd: str = "npm run test:src -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 # Install git and other system dependencies if needed
@@ -930,7 +929,7 @@ class Jqueryc28c26ae(JavaScriptProfile):
     test_cmd: str = "npm run test:browserless -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies
@@ -964,7 +963,7 @@ class Koa0a6afa5a(JavaScriptProfile):
     test_cmd: str = "node --test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -989,7 +988,7 @@ class Layuiabdb748b(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install git
@@ -1017,7 +1016,7 @@ class Mocha410ce0d2(JavaScriptProfile):
     test_cmd: str = "npm run test-node:unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 # Install git
@@ -1046,7 +1045,7 @@ class Reactnativeweba9de220b(JavaScriptProfile):
     test_cmd: str = "npm run unit:dom -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 # Install system dependencies
@@ -1078,7 +1077,7 @@ class Piskel51373322(JavaScriptProfile):
     test_cmd: str = "npm run unit-tests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-bullseye-slim
 
 # Install system dependencies for Playwright and Puppeteer
@@ -1129,7 +1128,7 @@ class Reduxsagaa4ace10d(JavaScriptProfile):
     test_cmd: str = "yarn test --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 # Install git for cloning and patching
@@ -1157,7 +1156,7 @@ class Riot32aecfaa(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1185,7 +1184,7 @@ class Svgoc06d8f68(JavaScriptProfile):
     test_cmd: str = "yarn cross-env NODE_OPTIONS=--experimental-vm-modules jest --maxWorkers=4 --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install git for cloning the repository
@@ -1213,7 +1212,7 @@ class Bruno80e09d1a(JavaScriptProfile):
     test_cmd: str = "npm test --workspaces --if-present -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1238,7 +1237,7 @@ class Webtorrentfd8f39e1(JavaScriptProfile):
     test_cmd: str = "npx tape test/*.js test/node/*.js"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies for native modules
@@ -1271,7 +1270,7 @@ class Whydidyourender3ec3512d(JavaScriptProfile):
     test_cmd: str = "yarn test --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies
@@ -1302,7 +1301,7 @@ class Eleventye9a16667(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1327,7 +1326,7 @@ class Workbox1893b3f6(JavaScriptProfile):
     test_cmd: str = "npm run test_node -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies required for building some native modules and git for cloning
@@ -1353,7 +1352,7 @@ class Habiticae0af620b(JavaScriptProfile):
     test_cmd: str = "npm run test:api:unit -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -1384,7 +1383,7 @@ class Modernizr1d4c9cee(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 # Install system dependencies including git and chromium for puppeteer/mocha-headless-chrome
@@ -1423,7 +1422,7 @@ class Falcor39d64776(JavaScriptProfile):
     test_cmd: str = "npm run test:only -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1448,7 +1447,7 @@ class Pm2ff1ca974(JavaScriptProfile):
     test_cmd: str = "npm run test:unit -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git procps bc python3 && rm -rf /var/lib/apt/lists/*
@@ -1472,7 +1471,7 @@ class Audiobookshelf626596b1(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-bullseye-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1510,7 +1509,7 @@ class Sailsffebacc5(JavaScriptProfile):
     test_cmd: str = "npm run custom-tests -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1532,7 +1531,7 @@ class Vuebootstrapvue9a246f45(JavaScriptProfile):
     test_cmd: str = "yarn jest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-bullseye-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1557,7 +1556,7 @@ class Nodepostgresecff60dc(JavaScriptProfile):
     test_cmd: str = "service postgresql start && sleep 5 && sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD 'postgres';\" && export PGPASSWORD=postgres && export PGUSER=postgres && export PGHOST=localhost && yarn test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1584,33 +1583,6 @@ CMD ["/bin/bash"]"""
 
 
 @dataclass
-class Claudecodetemplates734b8a50(JavaScriptProfile):
-    owner: str = "davila7"
-    repo: str = "claude-code-templates"
-    commit: str = "734b8a50cc2cf55222643e32a3b205483e244747"
-    test_cmd: str = "cd api && npm test -- --verbose"
-
-    @property
-    def dockerfile(self):
-        return f"""FROM node:18-slim
-
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
-
-RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
-WORKDIR /{ENV_NAME}
-
-RUN npm install && \
-    cd cli-tool && npm install && \
-    cd ../api && npm install
-
-CMD ["/bin/bash"]"""
-
-    def log_parser(self, log: str) -> dict[str, str]:
-        return parse_log_jest(log)
-
-
-@dataclass
 class Jsemotionb882bcba(JavaScriptProfile):
     owner: str = "emotion-js"
     repo: str = "emotion"
@@ -1618,7 +1590,7 @@ class Jsemotionb882bcba(JavaScriptProfile):
     test_cmd: str = "yarn jest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -1645,7 +1617,7 @@ class Enzyme61e1b47c(JavaScriptProfile):
     test_cmd: str = "npm run react 16 && npm run test:only -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y \
@@ -1676,7 +1648,7 @@ class Recoilc1b97f3a(JavaScriptProfile):
     test_cmd: str = "yarn relay"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1701,7 +1673,7 @@ class Superagentcec26064(JavaScriptProfile):
     test_cmd: str = "./node_modules/.bin/mocha --require should --trace-warnings --throw-deprecation --reporter spec --slow 2000 --timeout 5000 --exit test/*.js test/node/*.js"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git build-essential python3 && rm -rf /var/lib/apt/lists/*
@@ -1728,7 +1700,7 @@ class Supertest14d905dc(JavaScriptProfile):
     test_cmd: str = "npm test -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1750,7 +1722,7 @@ class Revealjsbecc9bd1(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies for git and Puppeteer
@@ -1820,7 +1792,7 @@ class Handsontablee71f0f42(JavaScriptProfile):
     test_cmd: str = "pnpm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
@@ -1847,7 +1819,7 @@ class Joi481e270e(JavaScriptProfile):
     test_cmd: str = "npx lab -t 100 -a @hapi/code -L -Y -v"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1872,7 +1844,7 @@ class Impressjsc9f6c674(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18
 
 RUN apt-get update && apt-get install -y \
@@ -1923,7 +1895,7 @@ class Htmlwebpackplugin9a39db80(JavaScriptProfile):
     test_cmd: str = "npm run test:only -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1948,7 +1920,7 @@ class Backbonee8bc45ac(JavaScriptProfile):
     test_cmd: str = "npx karma start --browsers ChromeHeadlessNoSandbox --single-run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git chromium && rm -rf /var/lib/apt/lists/*
@@ -1981,7 +1953,7 @@ class Hyperapp5a113fa0(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2003,7 +1975,7 @@ class Jsoneditor0319b213(JavaScriptProfile):
     test_cmd: str = "npm test -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2028,7 +2000,7 @@ class Uptimekuma5d955f95(JavaScriptProfile):
     test_cmd: str = "npm run test-backend"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies
@@ -2065,7 +2037,7 @@ class Jsmarko24b9402c(JavaScriptProfile):
     test_cmd: str = "env MARKO_DEBUG=1 ./node_modules/.bin/mocha --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -2090,7 +2062,7 @@ class Jsmdx00046053(JavaScriptProfile):
     test_cmd: str = "npm run test-api --workspaces --if-present"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2117,7 +2089,7 @@ class PapaParseb10b87ef(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y \
@@ -2144,7 +2116,7 @@ class Materialui1a233f88(JavaScriptProfile):
     test_cmd: str = "pnpm test:node run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:22-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2171,7 +2143,7 @@ class Nightwatch54c8550c(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2196,7 +2168,7 @@ class Nocke7418da2(JavaScriptProfile):
     test_cmd: str = "npm test -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2219,7 +2191,7 @@ class NoVNCd44f7e04(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 # Install system dependencies
@@ -2262,7 +2234,7 @@ class JsPDFe6cf03db(JavaScriptProfile):
     test_cmd: str = "npm run test-node"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return rf"""FROM node:18
 
 RUN apt-get update && apt-get install -y \
@@ -2329,7 +2301,7 @@ class Filepond38294959(JavaScriptProfile):
     test_cmd: str = "npm test -- --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2352,7 +2324,7 @@ class Reacttransitiongroup2989b5b8(JavaScriptProfile):
     test_cmd: str = "npm run testonly"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2375,7 +2347,7 @@ class Reactmarkdownfda7fa56(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2400,7 +2372,7 @@ class Nodemondaad5c16(JavaScriptProfile):
     test_cmd: str = "for FILE in test/**/*.test.js; do echo $FILE; TEST=1 ./node_modules/.bin/mocha --exit --timeout 30000 $FILE || true; sleep 1; done"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2422,7 +2394,7 @@ class Evergreen9b774aee(JavaScriptProfile):
     test_cmd: str = "yarn jest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2446,7 +2418,7 @@ class Serverlessde62c71e(JavaScriptProfile):
     test_cmd: str = "npm test -- --reporter spec"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2471,7 +2443,7 @@ class Jssqljs52e5649f(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM emscripten/emsdk:latest
 
 RUN apt-get update && apt-get install -y git make python3 unzip curl libdigest-sha3-perl && rm -rf /var/lib/apt/lists/*
@@ -2497,7 +2469,7 @@ class Jsonserverf5dfdaff(JavaScriptProfile):
     test_cmd: str = "npm test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2521,7 +2493,7 @@ class Webpack24e3c2d2(JavaScriptProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:20-slim
 
 RUN apt-get update && apt-get install -y git python3 build-essential && rm -rf /var/lib/apt/lists/*
@@ -2547,7 +2519,7 @@ class Ws726c3732(JavaScriptProfile):
     timeout: int = 300
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM node:18-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*

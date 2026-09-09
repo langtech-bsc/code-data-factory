@@ -17,7 +17,7 @@ from swesmith.profiles.java import (
     Gsondd2fe59c,
     Eureka459fcf59,
 )
-from swebench.harness.constants import TestStatus as Status
+from swesmith.harness.constants import TestStatus as Status
 
 
 # =============================================================================
@@ -34,7 +34,7 @@ def make_dummy_java_profile():
         commit = "deadbeefcafebabe"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM ubuntu:22.04\nRUN echo hello"
 
         def log_parser(self, log: str) -> dict[str, str]:
@@ -277,14 +277,14 @@ def test_gson_profile_properties():
     assert "-Dsurefire.reportFormat=plain" in profile.test_cmd
 
 
-def test_gson_profile_dockerfile():
-    """Test Gsondd2fe59c Dockerfile content"""
+def test_gson_profile_recipe():
+    """Test Gsondd2fe59c recipe content"""
     profile = Gsondd2fe59c()
-    dockerfile = profile.dockerfile
-    assert "FROM ubuntu:22.04" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "/testbed" in dockerfile
-    assert "mvn clean install" in dockerfile
+    recipe = profile.recipe
+    assert "FROM ubuntu:22.04" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "/testbed" in recipe
+    assert "mvn clean install" in recipe
 
 
 def test_gson_profile_log_parser():
@@ -311,14 +311,14 @@ def test_eureka_profile_properties():
     assert "find . -type f -name 'TEST-*.xml'" in profile.test_cmd
 
 
-def test_eureka_profile_dockerfile():
-    """Test Eureka459fcf59 Dockerfile content"""
+def test_eureka_profile_recipe():
+    """Test Eureka459fcf59 recipe content"""
     profile = Eureka459fcf59()
-    dockerfile = profile.dockerfile
-    assert "FROM eclipse-temurin:8-jdk" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "/testbed" in dockerfile
-    assert "./gradlew build" in dockerfile
+    recipe = profile.recipe
+    assert "FROM eclipse-temurin:8-jdk" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "/testbed" in recipe
+    assert "./gradlew build" in recipe
 
 
 def test_eureka_profile_log_parser():
@@ -349,7 +349,7 @@ def test_java_profile_inheritance_in_concrete_profiles():
         assert hasattr(profile, "repo")
         assert hasattr(profile, "commit")
         assert hasattr(profile, "test_cmd")
-        assert hasattr(profile, "dockerfile")
+        assert hasattr(profile, "recipe")
         assert hasattr(profile, "log_parser")
 
 
@@ -358,96 +358,13 @@ def test_java_profile_inheritance_in_concrete_profiles():
 # =============================================================================
 
 
-def test_java_profile_build_image():
-    """Test JavaProfile.build_image writes Dockerfile and runs docker"""
+def test_java_profile_build_image_uses_singularity_builder():
     profile = Gsondd2fe59c()
-
-    with (
-        patch("pathlib.Path.mkdir") as mock_mkdir,
-        patch("builtins.open", mock_open()) as mock_file,
-        patch("subprocess.run") as mock_run,
-    ):
+    with patch.object(profile, "_build_sif") as build_sif:
         profile.build_image()
 
-        # Verify directory creation
-        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
-
-        # Verify file operations
-        mock_file.assert_called()
-
-        # Verify docker build was called
-        mock_run.assert_called_once()
-        call_args = mock_run.call_args
-        assert "docker build" in call_args[0][0]
-        assert profile.image_name in call_args[0][0]
-
-
-def test_java_profile_build_image_error_handling():
-    """Test build_image error handling"""
-    profile = Gsondd2fe59c()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch(
-            "subprocess.run",
-            side_effect=subprocess.CalledProcessError(1, "docker build"),
-        ),
-    ):
-        with pytest.raises(subprocess.CalledProcessError):
-            profile.build_image()
-
-
-def test_java_profile_build_image_checks_exit_code():
-    """Test build_image checks subprocess exit code"""
-    profile = Gsondd2fe59c()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch("subprocess.run") as mock_run,
-    ):
-        profile.build_image()
-        assert mock_run.call_args.kwargs["check"] is True
-
-
-def test_java_profile_build_image_file_operations():
-    """Test build_image creates Dockerfile and build log"""
-    profile = Gsondd2fe59c()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()) as mock_file,
-        patch("subprocess.run"),
-    ):
-        profile.build_image()
-
-        file_calls = mock_file.call_args_list
-        assert len(file_calls) >= 2  # Dockerfile and build log
-
-        # Check for Dockerfile creation
-        dockerfile_calls = [call for call in file_calls if "Dockerfile" in str(call)]
-        assert len(dockerfile_calls) > 0
-
-        # Check for build log creation
-        log_calls = [call for call in file_calls if "build_image.log" in str(call)]
-        assert len(log_calls) > 0
-
-
-def test_java_profile_build_image_subprocess_parameters():
-    """Test build_image subprocess parameters"""
-    profile = Gsondd2fe59c()
-
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch("subprocess.run") as mock_run,
-    ):
-        profile.build_image()
-        call_args = mock_run.call_args
-        assert call_args[1]["shell"] is True
-        assert call_args[1]["stdout"] is not None
-        assert call_args[1]["stderr"] == subprocess.STDOUT
+    build_sif.assert_called_once()
+    assert "FROM ubuntu:22.04" in build_sif.call_args.args[0]
 
 
 def _write_file(base, relpath, content):

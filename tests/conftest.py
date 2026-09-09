@@ -97,11 +97,6 @@ def test_output_pytest():
 
 
 @pytest.fixture
-def logs_trajectories():
-    return Path(repo_root) / "tests/test_logs/trajectories"
-
-
-@pytest.fixture
 def logs_run_evaluation():
     return Path(repo_root) / "tests/test_logs/run_evaluation"
 

@@ -409,7 +409,7 @@ def make_dummy_cpp_profile():
         commit = "deadbeefcafebabe"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM gcc:12\nRUN echo hello"
 
         def log_parser(self, log: str) -> dict[str, str]:

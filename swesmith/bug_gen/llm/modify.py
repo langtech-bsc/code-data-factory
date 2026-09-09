@@ -1,17 +1,17 @@
 """
 Purpose: Given a repository, generate bug patches for functions/classes/objects in the repository.
 
-Usage: python -m swesmith.bug_gen.llm.modify \
+Usage: uv run python -m swesmith.bug_gen.llm.modify \
     --n_bugs <n_bugs> \
     --config_file <config_file> \
     --model <model> \
     repo  # e.g., tkrajina__gpxpy.09fc46b3
 
-Where model follows the litellm format.
+The model is served by the internal PTIE endpoint.
 
 Example:
 
-python -m swesmith.bug_gen.llm.modify tkrajina__gpxpy.09fc46b3 --config_file configs/bug_gen/class_basic.yml --model claude-3-7-sonnet-20250219 --n_bugs 1
+uv run python -m swesmith.bug_gen.llm.modify tkrajina__gpxpy.09fc46b3 --config_file configs/bug_gen/class_basic.yml --model glm-5.3-flash --n_bugs 1
 """
 
 import argparse
@@ -19,16 +19,12 @@ import dataclasses
 import shutil
 import jinja2
 import json
-import litellm
-import logging
 import os
 import random
 import yaml
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
-from litellm import completion
-from litellm.cost_calculator import completion_cost
 from swesmith.bug_gen.llm.utils import PROMPT_KEYS, extract_code_block
 from swesmith.bug_gen.utils import (
     apply_code_change,
@@ -46,13 +42,10 @@ from swesmith.profiles import registry
 from tqdm.auto import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 from typing import Any
+from swesmith.llm import complete
 
 
 load_dotenv(dotenv_path=os.getenv("SWEFT_DOTENV_PATH"))
-
-logging.getLogger("LiteLLM").setLevel(logging.WARNING)
-litellm.suppress_debug_info = True
-
 
 def gen_bug_from_code_lm(
     candidate: CodeEntity, configs: dict, n_bugs: int, model: str
@@ -92,7 +85,7 @@ def gen_bug_from_code_lm(
     ]
     # Remove empty messages
     messages = [x for x in messages if x["content"]]
-    response: Any = completion(model=model, messages=messages, n=n_bugs, temperature=1)
+    response: Any = complete(model=model, messages=messages, n=n_bugs, temperature=1)
     for choice in response.choices:
         message = choice.message
         explanation = (
@@ -104,7 +97,7 @@ def gen_bug_from_code_lm(
             BugRewrite(
                 rewrite=extract_code_block(message.content),
                 explanation=explanation,
-                cost=completion_cost(completion_response=response) / n_bugs,
+                cost=0.0,
                 output=message.content,
                 strategy="llm",
             )
@@ -232,7 +225,7 @@ if __name__ == "__main__":
         "--model",
         type=str,
         help="Model to use for bug generation",
-        default="openai/gpt-4o",
+        default="glm-5.3-flash",
     )
     parser.add_argument(
         "-n",

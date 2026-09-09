@@ -3,13 +3,12 @@ import re
 import shutil
 
 from dataclasses import dataclass, field
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     TestStatus,
 )
-from swesmith.constants import ENV_NAME
+from swesmith.constants import ENV_NAME, KEY_INSTANCE_ID
 from swesmith.profiles.base import RepoProfile, registry
 
 
@@ -29,7 +28,7 @@ class GoProfile(RepoProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM golang:1.24
 RUN git clone {self.mirror_url} /{ENV_NAME}
 WORKDIR /{ENV_NAME}
@@ -341,7 +340,7 @@ class BoomFilters(GoProfile):
     commit: str = "db6545748bc4726eb9410c6763c7e4035d6ccba3"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM golang:1.24
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
 WORKDIR /{ENV_NAME}
@@ -357,7 +356,7 @@ class Ini(GoProfile):
     commit: str = "b2f570e5b5b844226bbefe6fb521d891f529a951"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM golang:1.24
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
 WORKDIR /{ENV_NAME}
@@ -613,7 +612,7 @@ class Sqlingo(GoProfile):
     commit: str = "ed36ef030f789fb664e8d22d63bc03eceb45343d"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM golang:1.24
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
 WORKDIR /{ENV_NAME}

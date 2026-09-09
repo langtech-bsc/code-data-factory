@@ -4,7 +4,7 @@
   <img src="../assets/banner.png" alt="SWE-smith" style="max-height: 10em"/>
 </div>
 
-SWE-smith is toolkit for training Software Engineering (SWE) agents. With SWE-smith, you can:
+SWE-smith is a toolkit for creating executable Software Engineering (SWE) task data. With SWE-smith, you can:
 
 <div class="theme-img-wrapper">
   <img src="/assets/overview-light.png" class="theme-img theme-img--light" alt="Light Mode Image" style="width:100%">

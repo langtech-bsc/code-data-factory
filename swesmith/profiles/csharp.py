@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from swebench.harness.constants import TestStatus
+from swesmith.harness.constants import TestStatus
 from swesmith.constants import ENV_NAME
 from swesmith.profiles.base import RepoProfile, registry
 
@@ -21,7 +21,7 @@ class VirtualClient0bb16489(CSharpProfile):
     test_cmd: str = "./build-test.sh"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM mcr.microsoft.com/devcontainers/dotnet:dev-9.0-noble
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
 WORKDIR /{ENV_NAME}

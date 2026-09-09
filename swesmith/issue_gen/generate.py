@@ -1,10 +1,10 @@
 """
 Purpose: Given a bug patch, generate a GitHub-style issue that describes the bug.
 
-python swesmith/issue_gen/generate.py \
+uv run python swesmith/issue_gen/generate.py \
     --dataset logs/experiments/*.json \
     --config configs/issue_gen/*.yaml \
-    --model anthropic/claude-3-7-sonnet-20250219 \
+    --model glm-5.3-flash \
     --workers 2 \
     --redo_existing  # Optional: regenerate existing issue texts
 """
@@ -12,7 +12,6 @@ python swesmith/issue_gen/generate.py \
 import argparse
 import jinja2
 import json
-import litellm
 import logging
 import os
 import random
@@ -22,18 +21,16 @@ import yaml
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datasets import load_dataset
 from dotenv import load_dotenv
-from litellm import completion, completion_cost
-from litellm.utils import get_token_count
 from pathlib import Path
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
-    KEY_INSTANCE_ID,
     LOG_TEST_OUTPUT,
 )
 from swesmith.constants import (
     KEY_PATCH,
+    KEY_INSTANCE_ID,
     HF_DATASET,
     LOG_DIR_ISSUE_GEN,
     LOG_DIR_RUN_VALIDATION,
@@ -46,90 +43,12 @@ from swesmith.harness.utils import (
 )
 from swesmith.issue_gen.utils import get_test_function
 from swesmith.profiles import registry
-from typing import Any, Literal
-from tenacity import (
-    retry,
-    retry_if_not_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-    before_sleep_log,
-)
-from pydantic import BaseModel
-
-try:
-    from portkey_ai import Portkey
-except ImportError:
-    Portkey = None
-
-logging.getLogger("LiteLLM").setLevel(logging.WARNING)
-litellm.drop_params = True
-litellm.suppress_debug_info = True
+from swesmith.llm import complete
+from swesmith.llm import estimate_tokens
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
-
-
-class PortkeyModelConfig(BaseModel):
-    model_name: str
-    model_kwargs: dict[str, Any] = {}
-    provider: str = ""
-    litellm_model_name_override: str = ""
-    cost_tracking: Literal["default", "ignore_errors"] = "default"
-
-
-class PortkeyModel:
-    def __init__(self, *, config_class: type = PortkeyModelConfig, **kwargs):
-        if Portkey is None:
-            raise ImportError(
-                "The portkey-ai package is required to use PortkeyModel. Please install it with: pip install portkey-ai"
-            )
-
-        self.config = config_class(**kwargs)
-        self.cost = 0.0
-        self.n_calls = 0
-
-        # Get API key from environment or raise error
-        self._api_key = os.getenv("PORTKEY_API_KEY")
-        if not self._api_key:
-            raise ValueError(
-                "Portkey API key is required. Set it via the "
-                "PORTKEY_API_KEY environment variable."
-            )
-
-        # Get virtual key from environment
-        virtual_key = os.getenv("PORTKEY_VIRTUAL_KEY")
-
-        # Initialize Portkey client
-        client_kwargs = {"api_key": self._api_key}
-        if virtual_key:
-            client_kwargs["virtual_key"] = virtual_key
-        elif self.config.provider:
-            client_kwargs["provider"] = self.config.provider
-
-        self.client = Portkey(**client_kwargs)
-
-    @retry(
-        reraise=True,
-        stop=stop_after_attempt(10),
-        wait=wait_exponential(multiplier=1, min=4, max=60),
-        retry=retry_if_not_exception_type((KeyboardInterrupt, TypeError, ValueError)),
-        before_sleep=before_sleep_log(logger, logging.WARNING),
-    )
-    def _query(self, messages: list[dict[str, str]], **kwargs):
-        return self.client.chat.completions.create(
-            model=self.config.model_name,
-            messages=messages,
-            **(self.config.model_kwargs | kwargs),
-        )
-
-    def query(self, messages: list[dict[str, str]], **kwargs) -> Any:
-        # Simple adapter to match what generate.py expects (return an object with choices and usage for cost)
-        response = self._query(
-            [{"role": msg["role"], "content": msg["content"]} for msg in messages],
-            **kwargs,
-        )
-        return response
 
 
 TEST_SRC_CODE_PROMPT = r"""
@@ -146,7 +65,7 @@ def maybe_shorten(text_str: str, max_tokens: int, model: str) -> str:
     """Shorten text if it exceeds the max_tokens limit.
     If shortening, return a string with the first and last max_tokens//2 tokens.
     """
-    if get_token_count([{"content": text_str}], model) < max_tokens:
+    if estimate_tokens(text_str) < max_tokens:
         return text_str
     return text_str[: max_tokens // 2] + "\n\n(...)\n\n" + text_str[-max_tokens // 2 :]
 
@@ -159,31 +78,18 @@ class IssueGen:
         instance_ids: list | None = None,
         dataset_path: str = HF_DATASET,
         redo_existing: bool = False,
+        model: str | None = None,
     ):
         self.dataset_path = dataset_path
         self.redo_existing = redo_existing
         self.workers = workers
 
         self.config = yaml.safe_load(config_file.read_text())
-        self.model = self.config.get("model", "openai/gpt-4o")
+        self.model = model or self.config.get("model", "glm-5.3-flash")
+        self.api_base = os.getenv("SWESMITH_API_BASE", self.config.get("api_base"))
         settings = self.config.get("settings", {})
         self.n_instructions = settings.get("n_instructions", 1)
         self.max_var_tokens = settings.get("max_var_tokens", 10_000)
-
-        # Initialize Portkey model if needed
-        self.portkey_model = None
-        if (
-            self.model.startswith("portkey/")
-            or self.config.get("provider") == "portkey"
-        ):
-            self.portkey_model = PortkeyModel(
-                model_name=self.model.replace("portkey/", ""),
-                provider=self.config.get("provider", "openai"),
-                litellm_model_name_override=self.config.get(
-                    "litellm_model_name_override", ""
-                ),
-                **settings.get("portkey_kwargs", {}),
-            )
 
         data_smith = [x for x in load_dataset(HF_DATASET, split="train")]
         self.dataset = (
@@ -373,24 +279,16 @@ class IssueGen:
             _, repos_to_remove = self.get_test_functions(instance_curr)
             messages = metadata["messages"]
 
-        # Generate n_instructions completions containing problem statements
-        if self.portkey_model:
-            response = self.portkey_model.query(
-                messages, n=self.n_instructions, stream=False
-            )
-        else:
-            response = completion(
-                model=self.model,
-                messages=messages,
-                n=self.n_instructions,
-                temperature=0,
-            )
+        # Generate n_instructions completions through the local PTIE endpoint.
+        response = complete(
+            model=self.model,
+            api_base=self.api_base,
+            messages=messages,
+            n=self.n_instructions,
+            temperature=0,
+        )
 
-        model_for_cost = self.model
-        if self.portkey_model and self.portkey_model.config.litellm_model_name_override:
-            model_for_cost = self.portkey_model.config.litellm_model_name_override
-
-        cost = completion_cost(response, model=model_for_cost)
+        cost = 0.0
 
         metadata["cost"] = (0 if "cost" not in metadata else metadata["cost"]) + cost
 

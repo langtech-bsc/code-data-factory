@@ -6,9 +6,9 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from swebench.harness.constants import FAIL_TO_PASS, KEY_INSTANCE_ID
+from swesmith.harness.constants import FAIL_TO_PASS
 from swesmith.bug_gen.mirror.generate import INSTANCE_REF
-from swesmith.constants import KEY_PATCH
+from swesmith.constants import KEY_INSTANCE_ID, KEY_PATCH
 from swesmith.constants import ORG_NAME_GH
 from swesmith.profiles import registry, RepoProfile
 from swesmith.profiles.utils import INSTALL_CMAKE, INSTALL_BAZEL
@@ -57,6 +57,7 @@ def test_repo_profile_clone():
     # Test public repo clone (HTTPS read URL, SSH push URL)
     expected_dest = repo_profile.repo_name
     with (
+        patch.object(repo_profile, "_mirror_exists", return_value=True),
         patch.object(repo_profile, "_is_repo_private", return_value=False),
         patch("os.path.exists", return_value=False) as mock_exists,
         patch("subprocess.run") as mock_run,
@@ -78,6 +79,7 @@ def test_repo_profile_clone():
 
     # Test private repo clone (SSH for both read and push)
     with (
+        patch.object(repo_profile, "_mirror_exists", return_value=True),
         patch.object(repo_profile, "_is_repo_private", return_value=True),
         patch("os.path.exists", return_value=False),
         patch("subprocess.run") as mock_run,
@@ -95,6 +97,7 @@ def test_repo_profile_clone():
     # Test with custom dest
     custom_dest = "some_dir"
     with (
+        patch.object(repo_profile, "_mirror_exists", return_value=True),
         patch.object(repo_profile, "_is_repo_private", return_value=False),
         patch("os.path.exists", return_value=False),
         patch("subprocess.run") as mock_run,
@@ -107,6 +110,7 @@ def test_repo_profile_clone():
 
     # Test when repo already exists
     with (
+        patch.object(repo_profile, "_mirror_exists", return_value=True),
         patch("os.path.exists", return_value=True) as mock_exists,
         patch("subprocess.run") as mock_run,
     ):
@@ -128,7 +132,7 @@ def test_python_log_parser():
         FAILED = type("T", (), {"value": "FAILED"})
         SKIPPED = type("T", (), {"value": "SKIPPED"})
 
-    import swebench.harness.constants as harness_constants
+    import swesmith.harness.constants as harness_constants
 
     old = harness_constants.TestStatus
     harness_constants.TestStatus = [
@@ -160,7 +164,7 @@ def test_golang_log_parser():
         FAILED = type("T", (), {"value": "FAILED"})
         SKIPPED = type("T", (), {"value": "SKIPPED"})
 
-    import swebench.harness.constants as harness_constants
+    import swesmith.harness.constants as harness_constants
 
     old = harness_constants.TestStatus
     harness_constants.TestStatus = DummyStatus
@@ -212,7 +216,7 @@ def test_registry_register_profile():
 def test_registry_get_from_inst():
     """Test Registry.get_from_inst method"""
     from swesmith.profiles.base import Registry
-    from swebench.harness.constants import KEY_INSTANCE_ID
+    from swesmith.constants import KEY_INSTANCE_ID
 
     registry = Registry()
 
@@ -281,6 +285,7 @@ def test_registry_values():
 def test_mirror_exists():
     """Test _mirror_exists method"""
     repo_profile = registry.get("mewwts__addict.75284f95")
+    repo_profile._api = MagicMock()
 
     # Test when mirror exists (api.repos.get does not raise)
     with patch.object(repo_profile.api, "repos") as mock_repos:
@@ -305,6 +310,7 @@ def test_mirror_exists():
 def test_create_mirror():
     """Test create_mirror method"""
     repo_profile = registry.get("mewwts__addict.75284f95")
+    repo_profile._api = MagicMock()
 
     with (
         patch.object(repo_profile, "_mirror_exists", return_value=True),
@@ -699,62 +705,6 @@ def test_configure_ssh_env_does_not_overwrite():
     ):
         RepoProfile._configure_ssh_env()
         assert os.environ["GIT_SSH_COMMAND"] == "existing"
-
-
-def test_prepare_dockerfile():
-    """Test _prepare_dockerfile injects BuildKit syntax and SSH mounts."""
-    repo_profile = registry.get("mewwts__addict.75284f95")
-    input_dockerfile = "FROM python:3.10\nRUN pip install -e ."
-
-    result = repo_profile._prepare_dockerfile(input_dockerfile)
-
-    assert result.startswith("# syntax=docker/dockerfile:1")
-    assert 'ENV GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"' in result
-    assert "RUN --mount=type=ssh,required=false pip install -e ." in result
-
-
-def test_prepare_dockerfile_idempotent_syntax():
-    """Test _prepare_dockerfile does not duplicate the syntax directive."""
-    repo_profile = registry.get("mewwts__addict.75284f95")
-    input_dockerfile = (
-        "# syntax=docker/dockerfile:1\nFROM python:3.10\nRUN pip install -e ."
-    )
-
-    result = repo_profile._prepare_dockerfile(input_dockerfile)
-
-    assert result.count("# syntax=docker/dockerfile") == 1
-
-
-def test_docker_ssh_arg_with_key_found():
-    """Test _docker_ssh_arg when _find_ssh_key discovers a key."""
-    repo_profile = registry.get("mewwts__addict.75284f95")
-    with patch(
-        "swesmith.profiles.base._find_ssh_key",
-        return_value=Path("/home/user/.ssh/id_ed25519"),
-    ):
-        assert (
-            repo_profile._docker_ssh_arg == "--ssh default=/home/user/.ssh/id_ed25519"
-        )
-
-
-def test_docker_ssh_arg_private_repo_no_key():
-    """Test _docker_ssh_arg when repo is private but no key found anywhere."""
-    repo_profile = registry.get("mewwts__addict.75284f95")
-    with (
-        patch("swesmith.profiles.base._find_ssh_key", return_value=None),
-        patch.object(repo_profile, "_is_repo_private", return_value=True),
-    ):
-        assert repo_profile._docker_ssh_arg == "--ssh default"
-
-
-def test_docker_ssh_arg_public_repo_no_key():
-    """Test _docker_ssh_arg when repo is public and no key found."""
-    repo_profile = registry.get("mewwts__addict.75284f95")
-    with (
-        patch("swesmith.profiles.base._find_ssh_key", return_value=None),
-        patch.object(repo_profile, "_is_repo_private", return_value=False),
-    ):
-        assert repo_profile._docker_ssh_arg == ""
 
 
 def test_is_test_path_cases(tmp_path):

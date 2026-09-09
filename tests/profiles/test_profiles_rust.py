@@ -13,7 +13,7 @@ def make_dummy_rust_profile():
         commit = "deadbeefcafebabe"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM rust:1.88\nRUN echo hello"
 
     return DummyRustProfile()

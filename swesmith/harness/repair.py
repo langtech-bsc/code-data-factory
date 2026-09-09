@@ -27,13 +27,12 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     LOG_REPORT,
 )
-from swesmith.constants import KEY_TIMED_OUT, LOG_DIR_RUN_VALIDATION, LOG_DIR_TASKS
+from swesmith.constants import KEY_INSTANCE_ID, KEY_TIMED_OUT, LOG_DIR_RUN_VALIDATION, LOG_DIR_TASKS
 from swesmith.profiles import registry
 from tqdm.auto import tqdm
 

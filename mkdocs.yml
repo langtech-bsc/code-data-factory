@@ -69,8 +69,6 @@ nav:
     - Create Instances: guides/create_instances.md
     - Validation & Evaluation: guides/harnesses.md
     - Generate Issue Text: guides/issue_gen.md
-    - Rate Difficulty: guides/difficulty_rating.md
-    - Train SWE-agents: guides/train_swe_agent.md
   - Miscellaneous:
     - Build Python Environments: guides/env_construction_py.md
 plugins:

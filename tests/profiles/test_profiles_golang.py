@@ -13,7 +13,7 @@ def make_dummy_go_profile():
         commit = "deadbeefcafebabe"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM golang:1.20\nRUN echo hello"
 
     return DummyGoProfile()
@@ -86,77 +86,13 @@ def test_go_profile_log_parser_multiple_tests():
     assert result["TestBinding"] == "FAILED"
 
 
-def test_go_profile_build_image_writes_dockerfile_and_runs_docker():
+def test_go_profile_build_image_uses_singularity_builder():
     profile = make_dummy_go_profile()
-    with (
-        patch("pathlib.Path.mkdir") as mock_mkdir,
-        patch("builtins.open", mock_open()) as mock_file,
-        patch("subprocess.run") as mock_run,
-    ):
+    with patch.object(profile, "_build_sif") as build_sif:
         profile.build_image()
-        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
-        mock_file.assert_called()
-        mock_run.assert_called_once()
-        call_args = mock_run.call_args
-        assert "docker build" in call_args[0][0]
-        assert profile.image_name in call_args[0][0]
 
-
-def test_go_profile_build_image_error_handling():
-    profile = make_dummy_go_profile()
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch(
-            "subprocess.run",
-            side_effect=subprocess.CalledProcessError(1, "docker build"),
-        ),
-    ):
-        with pytest.raises(subprocess.CalledProcessError):
-            profile.build_image()
-
-
-def test_go_profile_build_image_checks_exit_code():
-    profile = make_dummy_go_profile()
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch(
-            "subprocess.run",
-        ) as mock_run,
-    ):
-        profile.build_image()
-        assert mock_run.call_args.kwargs["check"] is True
-
-
-def test_go_profile_build_image_file_operations():
-    profile = make_dummy_go_profile()
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()) as mock_file,
-        patch("subprocess.run"),
-    ):
-        profile.build_image()
-        file_calls = mock_file.call_args_list
-        assert len(file_calls) >= 2  # Dockerfile and build log
-        dockerfile_calls = [call for call in file_calls if "Dockerfile" in str(call)]
-        assert len(dockerfile_calls) > 0
-        log_calls = [call for call in file_calls if "build_image.log" in str(call)]
-        assert len(log_calls) > 0
-
-
-def test_go_profile_build_image_subprocess_parameters():
-    profile = make_dummy_go_profile()
-    with (
-        patch("pathlib.Path.mkdir"),
-        patch("builtins.open", mock_open()),
-        patch("subprocess.run") as mock_run,
-    ):
-        profile.build_image()
-        call_args = mock_run.call_args
-        assert call_args[1]["shell"] is True
-        assert call_args[1]["stdout"] is not None
-        assert call_args[1]["stderr"] == subprocess.STDOUT
+    build_sif.assert_called_once()
+    assert "FROM golang:1.20" in build_sif.call_args.args[0]
 
 
 def test_go_profile_go_test_command():
@@ -167,11 +103,11 @@ def test_go_profile_go_test_command():
     assert "./..." in profile.test_cmd
 
 
-def test_gin_profile_dockerfile_content():
-    # This test is Gin-specific and checks the Gin profile's Dockerfile
+def test_gin_profile_recipe_content():
+    # This test is Gin-specific and checks the Gin profile's recipe
     profile = Gin3c12d2a8()
-    dockerfile = profile.dockerfile
-    assert "FROM golang:1.24" in dockerfile
-    assert f"git clone https://github.com/{profile.mirror_name}" in dockerfile
-    assert "WORKDIR /testbed" in dockerfile
-    assert "go mod tidy" in dockerfile
+    recipe = profile.recipe
+    assert "FROM golang:1.24" in recipe
+    assert f"git clone https://github.com/{profile.mirror_name}" in recipe
+    assert "WORKDIR /testbed" in recipe
+    assert "go mod tidy" in recipe

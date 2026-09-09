@@ -1,4 +1,4 @@
-You should now have an environment (Docker image) of a repository. Let's synthesize some task instances.
+You should now have a Singularity environment for a repository. Let's synthesize some task instances.
 
 Task instances are modified versions of the codebase which break existing tests.
 The formulation for these task instances is identical to the definition put forth by [SWE-bench](https://swe-bench.github.io).
@@ -45,16 +45,16 @@ Per entity, we prompt a language model to either:
 **How do I run it?**
 To prompt an LM to modify a function to introduce a bug:
 ```bash
-python -m swesmith.bug_gen.llm.modify $repo \
+uv run python -m swesmith.bug_gen.llm.modify $repo \
   --n_bugs 1 \
-  --model openai/gpt-4o \
+  --model glm-5.3-flash \
   --config_file configs/bug_gen/lm_modify.yml
 ```
 
 To prompt an LM to rewrite a function from scratch:
 ```bash
-python -m swesmith.bug_gen.llm.rewrite $repo \
-  --model anthropic/claude-3-7-sonnet-20250219 \
+uv run python -m swesmith.bug_gen.llm.rewrite $repo \
+  --model glm-5.3-flash \
   --config_file configs/bug_gen/lm_rewrite.yml \
   --n_workers 1
 ```
@@ -94,7 +94,7 @@ Because AST's give us a rigorous representation that allow modifications of spec
 
 **How do I run it?**
 ```bash
-python -m swesmith.bug_gen.procedural.generate $repo \
+uv run python -m swesmith.bug_gen.procedural.generate $repo \
   --max_bugs 10
 ```
 
@@ -107,18 +107,18 @@ Identical to LM Generated task instances, but the artifacts are instead named:
 Where `<name>` refers to the specific identifier for the procedural modification technique.
 There are 13 (and counting) in total.
 
-### Running at Scale on Modal
+### Running at Scale with Slurm and Singularity
 
-For generating and validating bugs across many repositories, use the `scripts/bug_gen.py` script which runs on [Modal](https://modal.com) for scalable cloud execution.
+For generating and validating bugs across many repositories, use `scripts/bug_gen.py` in an interactive or batch Slurm allocation. Each task runs in a Singularity image and logs stay on the shared filesystem.
 
 **Basic Usage**
 
 ```bash
 # Generate + validate bugs for all JavaScript repos
-modal run scripts/bug_gen.py --language javascript
+uv run python scripts/bug_gen.py --language javascript
 
 # Process specific repos only
-modal run scripts/bug_gen.py --language javascript --repos "owner/repo1,owner/repo2"
+uv run python scripts/bug_gen.py --language javascript --repos "owner/repo1,owner/repo2"
 ```
 
 **Two-Phase Pipeline**
@@ -126,7 +126,7 @@ modal run scripts/bug_gen.py --language javascript --repos "owner/repo1,owner/re
 The script runs two phases automatically:
 
 1. **Generation Phase**: Creates bug candidates for each repository using procedural modifications.
-2. **Validation Phase**: Runs pre-gold (baseline) tests, then post-gold tests to verify which bugs actually break tests. Results are persisted to the Modal Volume.
+2. **Validation Phase**: Runs pre-gold (baseline) tests, then post-gold tests to verify which bugs actually break tests. Results are persisted under `logs/` on GPFS.
 
 !!! tip "Incremental Processing"
     The script automatically skips already-processed repos and patches. You can safely re-run the command to continue from where it left off.
@@ -135,7 +135,7 @@ The script runs two phases automatically:
 
 ```bash
 # Check current stats without running generation/validation
-modal run scripts/bug_gen.py --language javascript --show-stats
+uv run python scripts/bug_gen.py --language javascript --show-stats
 ```
 
 This displays a table with generated, validated, and valid bug counts per repository.
@@ -145,7 +145,7 @@ This displays a table with generated, validated, and valid bug counts per reposi
 To save output to a log file with real-time unbuffered streaming:
 
 ```bash
-PYTHONUNBUFFERED=1 stdbuf -oL -eL uv run modal run --detach scripts/bug_gen.py --language javascript 2>&1 | tee validation.log
+PYTHONUNBUFFERED=1 stdbuf -oL -eL uv run python scripts/bug_gen.py --language javascript 2>&1 | tee validation.log
 ```
 
 ## PR Mirroring
@@ -176,12 +176,33 @@ If this process succeeds, we create a candidate task instance that effectively u
 
 **How do I run it?**
 ```bash
-python -m swesmith.bug_gen.mirror.generate $file \
-    --model openai/o3-mini
+uv run python -m swesmith.bug_gen.mirror.generate $file \
+    --model glm-5.3-flash
 ```
 
 **What artifact(s) does it produce?**
 
+
+## MN5 Slurm Pipeline
+
+On MareNostrum 5, build repository SIFs in a dedicated GPP job and then run
+generation, validation, gathering, and issue generation as dependent jobs. The
+artifacts stay on GPFS, while task workspaces use node-local temporary storage
+when `TMPDIR` is available.
+
+```bash
+# Start the internal PTIE endpoint separately when issue generation is enabled.
+scripts/serve_glm53.sh
+
+# Submit image-build -> generation -> validation -> gather -> issue.
+scripts/submit_bug_gen.sh \
+  --language javascript \
+  --phases gen,val,gather,issue
+```
+
+Use `--repos owner/repo1,owner/repo2` to restrict a run. The wrapper defaults
+to account `bsc88`, QoS `gp_bscaii`, one GPP node, and 112 CPUs. Set
+`SWESMITH_WORK_ROOT` and `SWESMITH_SIF_ROOT` to override the GPFS locations.
 
 
 ## Combining Bugs
@@ -216,14 +237,14 @@ You can control
 
 **How do I run it?**
 ```bash
-python -m swesmith.bug_gen.combine.same_file logs/bug_gen/<repo> \
+uv run python -m swesmith.bug_gen.combine.same_file logs/bug_gen/<repo> \
   --num_patches 3 \
   --limit_per_file 15 \
   --max_combos 100
 ```
 
 ```bash
-python -m swesmith.bug_gen.combine.same_module logs/bug_gen/<repo> \
+uv run python -m swesmith.bug_gen.combine.same_module logs/bug_gen/<repo> \
   --num_patches 2 \
   --limit_per_module 20 \
   --max_combos 200 \

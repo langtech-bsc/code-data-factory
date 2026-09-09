@@ -17,10 +17,10 @@ import os
 import subprocess
 
 from pathlib import Path
-from swebench.harness.constants import KEY_INSTANCE_ID
 from swesmith.bug_gen.utils import apply_patches, get_combos
 from swesmith.constants import (
     LOG_DIR_BUG_GEN,
+    KEY_INSTANCE_ID,
     LOG_DIR_TASKS,
     PREFIX_BUG,
     PREFIX_METADATA,

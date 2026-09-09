@@ -7,14 +7,14 @@ from unittest.mock import patch
 from swesmith.constants import ENV_NAME
 from swesmith.profiles.javascript import (
     JavaScriptProfile,
-    default_npm_install_dockerfile,
+    default_npm_install_recipe,
     parse_log_karma,
     parse_log_jasmine,
     GithubReadmeStats3e974011,
     Commanderjs395cf714,
     Colorfef7b619,
 )
-from swebench.harness.constants import TestStatus
+from swesmith.harness.constants import TestStatus
 
 
 def make_dummy_js_profile():
@@ -25,7 +25,7 @@ def make_dummy_js_profile():
         test_cmd = "npm test"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM node:18\nRUN echo hello"
 
         def log_parser(self, log):
@@ -124,56 +124,56 @@ No test results here
     assert result == {}
 
 
-# --- Tests for default_npm_install_dockerfile and mirror_url usage ---
+# --- Tests for default_npm_install_recipe and mirror_url usage ---
 
 
-def test_default_npm_install_dockerfile_default_node():
-    result = default_npm_install_dockerfile("https://github.com/org/repo")
+def test_default_npm_install_recipe_default_node():
+    result = default_npm_install_recipe("https://github.com/org/repo")
     assert "FROM node:18-bullseye" in result
     assert f"git clone https://github.com/org/repo /{ENV_NAME}" in result
     assert "npm install" in result
 
 
-def test_default_npm_install_dockerfile_custom_node():
-    result = default_npm_install_dockerfile(
+def test_default_npm_install_recipe_custom_node():
+    result = default_npm_install_recipe(
         "https://github.com/org/repo", node_version="22"
     )
     assert "FROM node:22-bullseye" in result
 
 
-def test_default_npm_install_dockerfile_ssh_url():
-    result = default_npm_install_dockerfile("git@github.com:org/repo.git")
+def test_default_npm_install_recipe_ssh_url():
+    result = default_npm_install_recipe("git@github.com:org/repo.git")
     assert f"git clone git@github.com:org/repo.git /{ENV_NAME}" in result
 
 
-def test_github_readme_stats_dockerfile_uses_mirror_url():
+def test_github_readme_stats_recipe_uses_mirror_url():
     profile = GithubReadmeStats3e974011()
     with patch.object(type(profile), "_is_repo_private", return_value=False):
-        dockerfile = profile.dockerfile
-        assert f"https://github.com/{profile.mirror_name}" in dockerfile
+        recipe = profile.recipe
+        assert f"https://github.com/{profile.mirror_name}" in recipe
 
 
-def test_github_readme_stats_dockerfile_ssh_when_private():
+def test_github_readme_stats_recipe_ssh_when_private():
     profile = GithubReadmeStats3e974011()
     with patch.object(type(profile), "_is_repo_private", return_value=True):
-        dockerfile = profile.dockerfile
-        assert f"git@github.com:{profile.mirror_name}.git" in dockerfile
+        recipe = profile.recipe
+        assert f"git@github.com:{profile.mirror_name}.git" in recipe
 
 
 def test_commanderjs_uses_node_20():
     profile = Commanderjs395cf714()
     with patch.object(type(profile), "_is_repo_private", return_value=False):
-        dockerfile = profile.dockerfile
-        assert "FROM node:20-bullseye" in dockerfile
-        assert f"https://github.com/{profile.mirror_name}" in dockerfile
+        recipe = profile.recipe
+        assert "FROM node:20-bullseye" in recipe
+        assert f"https://github.com/{profile.mirror_name}" in recipe
 
 
 def test_color_uses_node_22():
     profile = Colorfef7b619()
     with patch.object(type(profile), "_is_repo_private", return_value=False):
-        dockerfile = profile.dockerfile
-        assert "FROM node:22-bullseye" in dockerfile
-        assert f"https://github.com/{profile.mirror_name}" in dockerfile
+        recipe = profile.recipe
+        assert "FROM node:22-bullseye" in recipe
+        assert f"https://github.com/{profile.mirror_name}" in recipe
 
 
 def test_build_test_name_to_files_map_it_single_quotes(tmp_path):

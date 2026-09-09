@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field
 
 from swesmith.constants import ENV_NAME
-from swebench.harness.constants import TestStatus
+from swesmith.harness.constants import TestStatus
 from swesmith.profiles.base import RepoProfile, registry
 
 
@@ -143,7 +143,7 @@ class RubyProfile(RepoProfile):
         return parse_log_ruby_test(log)
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -206,7 +206,7 @@ class Fluentd7906fda4(RubyProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -245,7 +245,7 @@ class Fpm5b1fe9af(RubyProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -297,7 +297,7 @@ class Devise5b008ed5(RubyProfile):
     test_cmd: str = "bundle exec rake test TESTOPTS='--verbose'"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -329,7 +329,7 @@ class FactoryBot8a64d293(RubyProfile):
     test_cmd: str = "bundle exec rspec --format json"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -420,7 +420,7 @@ class Sinatra9e5c4ec8(RubyProfile):
     timeout: int = 180
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
@@ -444,7 +444,7 @@ class Vcr9a66a8a0(RubyProfile):
     test_cmd: str = "bundle exec rspec --format json"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ruby:{self.ruby_version}
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC

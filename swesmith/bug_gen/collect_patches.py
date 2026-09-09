@@ -1,7 +1,7 @@
 """
 Purpose: Collect all the patches into a single json file that can be fed into swesmith.harness.valid
 
-Usage: python -m swesmith.bug_gen.collect_patches logs/bug_gen/<repo>
+Usage: uv run python -m swesmith.bug_gen.collect_patches logs/bug_gen/<repo>
 
 NOTE: Must be with respect to a logs/bug_gen/<...>/ directory
 """
@@ -11,13 +11,12 @@ import os
 import json
 from pathlib import Path
 
-from swebench.harness.constants import KEY_INSTANCE_ID
-from swesmith.constants import LOG_DIR_BUG_GEN, KEY_PATCH, PREFIX_BUG
+from swesmith.constants import KEY_INSTANCE_ID, LOG_DIR_BUG_GEN, KEY_PATCH, PREFIX_BUG
 
 
 def main(bug_gen_path: str | Path, bug_type: str = "all", num_bugs: int = -1):
     """
-    Collect all the patches into a single json file that can be fed into swebench.harness.valid
+    Collect all the patches into a single JSON file for validation.
     :param repo_path: Path to the bug_gen logs.
     :param bug_type: Type of patches to collect. (default: all)
     :param num_bugs: Number of bugs to collect. (default: all)

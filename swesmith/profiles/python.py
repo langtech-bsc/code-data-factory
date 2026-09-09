@@ -1,16 +1,13 @@
 import re
-import subprocess
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     TestStatus,
 )
-from swebench.harness.dockerfiles import get_dockerfile_env
-from swesmith.constants import LOG_DIR_ENV, ENV_NAME, INSTANCE_REF, ORG_NAME_DH
+from swesmith.constants import LOG_DIR_ENV, ENV_NAME, INSTANCE_REF, KEY_INSTANCE_ID, ORG_NAME_DH
 from swesmith.profiles.base import RepoProfile, registry
 from swesmith.profiles.utils import INSTALL_BAZEL, INSTALL_CMAKE
 
@@ -65,30 +62,18 @@ class PythonProfile(RepoProfile):
             'echo "Current environment: $CONDA_DEFAULT_ENV"',
         ] + self.install_cmds
 
-        dockerfile = get_dockerfile_env(
-            self.pltf, self.arch, "py", base_image_key=BASE_IMAGE_KEY
+        recipe = "\n".join(
+            [
+                f"FROM {BASE_IMAGE_KEY}:latest",
+                "COPY setup_env.sh /setup_env.sh",
+                "RUN bash /setup_env.sh",
+            ]
         )
-        dockerfile = self._prepare_dockerfile(dockerfile)
-
         env_dir = LOG_DIR_ENV / self.repo_name
         env_dir.mkdir(parents=True, exist_ok=True)
         with open(env_dir / "setup_env.sh", "w") as f:
             f.write("\n".join(setup_commands) + "\n")
-        with open(env_dir / "Dockerfile", "w") as f:
-            f.write(dockerfile)
-
-        build_cmd = (
-            f"docker build --platform {self.pltf} --no-cache"
-            f" {self._docker_ssh_arg} -t {self.image_name} {env_dir}"
-        )
-        with open(env_dir / "build_image.log", "w") as log_file:
-            subprocess.run(
-                build_cmd,
-                check=True,
-                shell=True,
-                stdout=log_file,
-                stderr=subprocess.STDOUT,
-            )
+        self._build_sif(recipe, env_dir)
 
     def log_parser(self, log: str) -> dict[str, str]:
         """Parser for test logs generated with PyTest framework"""

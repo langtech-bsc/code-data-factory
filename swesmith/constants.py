@@ -3,6 +3,7 @@ Purpose: Repo-wide constants
 """
 
 import hashlib
+import os
 import random
 import string
 
@@ -16,14 +17,21 @@ DEFAULT_PM_LIKELIHOOD = 0.2
 ENV_NAME = "testbed"
 HF_DATASET = "SWE-bench/SWE-smith"
 INSTANCE_REF = "instance_ref"
+KEY_INSTANCE_ID = "instance_id"
+KEY_MODEL = "model_name_or_path"
+KEY_PREDICTION = "model_patch"
 KEY_IMAGE_NAME = "image_name"
+UTF8 = "utf-8"
 KEY_PATCH = "patch"
 KEY_TIMED_OUT = "timed_out"
-LOG_DIR_BUG_GEN = Path("logs/bug_gen")
-LOG_DIR_ENV = Path("logs/build_images/env")
-LOG_DIR_ISSUE_GEN = Path("logs/issue_gen")
-LOG_DIR_RUN_VALIDATION = Path("logs/run_validation")
-LOG_DIR_TASKS = Path("logs/task_insts")
+WORK_ROOT = Path(os.environ.get("SWESMITH_WORK_ROOT", ".")).expanduser()
+LOG_ROOT = WORK_ROOT / "logs"
+LOG_DIR_BUG_GEN = LOG_ROOT / "bug_gen"
+LOG_DIR_ENV = LOG_ROOT / "build_images/env"
+LOG_DIR_ISSUE_GEN = LOG_ROOT / "issue_gen"
+LOG_DIR_RUN_VALIDATION = LOG_ROOT / "run_validation"
+LOG_DIR_STATUS = LOG_ROOT / "status"
+LOG_DIR_TASKS = LOG_ROOT / "task_insts"
 LOG_TEST_OUTPUT_PRE_GOLD = "test_output_pre_gold.txt"
 MAX_INPUT_TOKENS = 128000
 ORG_NAME_DH = "swebench"

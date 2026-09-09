@@ -17,7 +17,9 @@ test_cmd="cargo test --verbose"
 # The original script had an incorrect image name format (with _1776_ in it).
 
 # Build the image
-python -m swesmith.build_repo.create_images --profiles $image_name -y
+uv run python -m swesmith.build_repo.create_images --repos "$image_name" -y
 
-# Test the docker image by running the test command
-docker run -it --rm $image_name $test_cmd
+# Test the Singularity image by running the test command
+sif_root="${SWESMITH_SIF_ROOT:-/gpfs/scratch/bsc88/post-training/singularities/code-data-factory}"
+sif_path="$sif_root/$(printf '%s' "$image_name" | sed 's#^.*/##; s/:/_/g').sif"
+singularity exec "$sif_path" bash -lc "$test_cmd"

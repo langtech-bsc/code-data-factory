@@ -1,21 +1,6 @@
 import json
 import pytest
 
-from swesmith.harness.eval import main as run_evaluation
-
-# Existing test
-
-
-def test_run_evaluation():
-    run_evaluation(
-        "test_sanity",
-        2,
-        instance_ids=[
-            "kennethreitz__records.5941ab27.combine_file__95trbjmz",
-            "kurtmckee__feedparser.cad965a3.combine_file__115z1mk8",
-        ],
-    )
-
 
 # New tests for artifacts
 @pytest.mark.parametrize(

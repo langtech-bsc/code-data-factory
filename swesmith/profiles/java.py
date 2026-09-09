@@ -4,13 +4,12 @@ import shutil
 import xml.etree.ElementTree as ET
 
 from dataclasses import dataclass, field
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     FAIL_TO_PASS,
     PASS_TO_PASS,
-    KEY_INSTANCE_ID,
     TestStatus,
 )
-from swesmith.constants import ENV_NAME
+from swesmith.constants import ENV_NAME, KEY_INSTANCE_ID
 from swesmith.profiles.base import RepoProfile, registry
 
 
@@ -214,7 +213,7 @@ class Gsondd2fe59c(JavaProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -239,7 +238,7 @@ class Mindustry2ad41a90(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -264,7 +263,7 @@ class Asynchttpclientae59f51f(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.8-eclipse-temurin-11
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -292,7 +291,7 @@ class Recaf2a93d630(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:22-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -317,7 +316,7 @@ class HMCL79a1c3af(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -343,7 +342,7 @@ class Web3j37d9bc9b(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -368,7 +367,7 @@ class Disruptorc871ca49(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -393,7 +392,7 @@ class MycatServer243539fb(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8-openjdk-8-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -423,7 +422,7 @@ class Eureka459fcf59(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -448,7 +447,7 @@ class Paper81b91224(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -475,7 +474,7 @@ class MPAndroidChart9c7275a0(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM runmymind/docker-android-sdk:latest
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -499,7 +498,7 @@ class RxAndroidd7bd9b74(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM debian:bullseye-slim
 
 RUN apt-get update && apt-get install -y \
@@ -543,7 +542,7 @@ class GoGoGode0d5961(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM --platform=linux/amd64 eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git wget unzip && rm -rf /var/lib/apt/lists/*
@@ -585,7 +584,7 @@ class Austin4c921ea0(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -614,7 +613,7 @@ class Mapper3aa82765(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -642,7 +641,7 @@ class QLExpressa632409f(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -671,7 +670,7 @@ class Druid933dee04(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8-openjdk-8-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -699,7 +698,7 @@ class Otter7544d051(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.8-eclipse-temurin-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -728,7 +727,7 @@ class Hbase30c42a87(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -760,7 +759,7 @@ class Jmeterb1843c2a(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -788,14 +787,14 @@ class Pulsarc51346fa(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
 WORKDIR /{ENV_NAME}
-# Pulsar is a massive project. We install a subset (pulsar-common) to ensure the Dockerfile is manageable and builds reliably.
+# Pulsar is a massive project. We install a subset (pulsar-common) to ensure the recipe is manageable and builds reliably.
 RUN mvn clean install -B -q -DskipTests -pl pulsar-common -am
 
 CMD ["/bin/bash"]"""
@@ -818,7 +817,7 @@ class Rocketmq9ad4a1b9(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -849,7 +848,7 @@ class Seatunneled021460(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.7-eclipse-temurin-11
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -877,7 +876,7 @@ class Shardingsphereecf76ffc(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -907,7 +906,7 @@ class Shenyu74954fa2(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.5-openjdk-17-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -935,7 +934,7 @@ class Mybatisplus9c06ccaf(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -959,7 +958,7 @@ class Bazel08e077e7(JavaProfile):
     timeout: int = 300
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y \
@@ -1003,7 +1002,7 @@ class HikariCPbba167f0(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-11
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1031,7 +1030,7 @@ class YCSB6d0fbba2(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -1061,7 +1060,7 @@ class Btrace3ba0198d(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git openjdk-8-jdk openjdk-11-jdk && rm -rf /var/lib/apt/lists/*
@@ -1085,7 +1084,7 @@ class Hutool44836454(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-8
 
 RUN git clone https://github.com/{self.mirror_name} /{ENV_NAME}
@@ -1112,7 +1111,7 @@ class Thumbnailator068d36e3(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9-eclipse-temurin-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1140,7 +1139,7 @@ class Spotless8e776ec8(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1164,7 +1163,7 @@ class Dropwizarde01f4694(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1194,7 +1193,7 @@ class Metrics968f367a(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-jammy
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1222,7 +1221,7 @@ class Flowableengine1d9f04bc(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 
@@ -1250,7 +1249,7 @@ class Gephi8f9b9faa(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1278,7 +1277,7 @@ class Googlejavaformat737b0032(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9-eclipse-temurin-21
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1307,7 +1306,7 @@ class Guice6682b69d(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1335,7 +1334,7 @@ class Hibernateorm8cc56928(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:25-jdk-noble
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1361,7 +1360,7 @@ class Apktool1981d35b(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1386,7 +1385,7 @@ class Jetlinkscommunity858dab55(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1415,7 +1414,7 @@ class Jsonschema2pojo8c90ed48(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.9-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1443,7 +1442,7 @@ class Zxingandroidembeddedd09b7c76(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git wget unzip libstdc++6 && rm -rf /var/lib/apt/lists/*
@@ -1480,7 +1479,7 @@ class JsonPathb6c60b3d(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1505,7 +1504,7 @@ class JustAuth694bbf1b(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -1534,7 +1533,7 @@ class Aviatorscript231198d3(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1562,7 +1561,7 @@ class Langchain4j82b882d8(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1593,7 +1592,7 @@ class Usbserialforandroida8b9ecc7(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM runmymind/docker-android-sdk:latest
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1618,7 +1617,7 @@ class OsmAnd14a13bbc(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-focal
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1646,7 +1645,7 @@ class Miaoshae5801765(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -1676,7 +1675,7 @@ class Quarkus99a220ef(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1708,7 +1707,7 @@ class Questdb773dd8bf(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-focal
 
 # Install system dependencies
@@ -1752,7 +1751,7 @@ class Bytebuddy9689261b(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1780,7 +1779,7 @@ class Reactorcore2198701c(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1805,7 +1804,7 @@ class Jedis52483b82(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -1834,7 +1833,7 @@ class Restassureda67ed7ac(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1862,7 +1861,7 @@ class TelegramBots082d9846(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1890,7 +1889,7 @@ class SmartRefreshLayout224db48f(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git wget unzip libncurses6 && rm -rf /var/lib/apt/lists/*
@@ -1931,7 +1930,7 @@ class SignalServer065e7302(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:24-jdk-noble
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1959,7 +1958,7 @@ class Jadx331c4aaa(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -1985,7 +1984,7 @@ class Socketioclientjavaeb438de0(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && \
@@ -2017,7 +2016,7 @@ class Strimzikafkaoperator2d31a2b6(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git maven wget && \
@@ -2049,7 +2048,7 @@ class Traccardc1dfe15(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-jammy
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2074,7 +2073,7 @@ class Motan4c18b71e(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.7-eclipse-temurin-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2103,7 +2102,7 @@ class Zxing50799640(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8-openjdk-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2131,7 +2130,7 @@ class Fragmentation0394930a(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM --platform=linux/amd64 eclipse-temurin:8-jdk-jammy
 
 RUN apt-get update && apt-get install -y git wget unzip libncurses5 && rm -rf /var/lib/apt/lists/*
@@ -2173,7 +2172,7 @@ class Sentinel222670e6(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2202,7 +2201,7 @@ class Canalc0619c42(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8-openjdk-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2230,7 +2229,7 @@ class Fastjsonc942c834(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2259,7 +2258,7 @@ class Jvmsandboxc01c28ab(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -2287,7 +2286,7 @@ class Nacosf39ce37f(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.7-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2315,7 +2314,7 @@ class Calcite84e35baf(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2343,7 +2342,7 @@ class Cassandra7fe688b0(JavaProfile):
     timeout: int = 300
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git ant ant-optional python3 python3-pip && rm -rf /var/lib/apt/lists/*
@@ -2369,7 +2368,7 @@ class Dubboa92d5d08(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk-focal
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2399,7 +2398,7 @@ class Flinkcdc7d9e1c62(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -2430,7 +2429,7 @@ class Hadoop7f2f7149(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y \\
@@ -2475,7 +2474,7 @@ class Iceberg15485f55(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2501,7 +2500,7 @@ class Incubatorkiedroolsfe6decc7(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git wget curl && rm -rf /var/lib/apt/lists/*
@@ -2535,7 +2534,7 @@ class Iotdb36dadf5d(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk-focal
 
 RUN apt-get update && apt-get install -y git maven thrift-compiler && rm -rf /var/lib/apt/lists/*
@@ -2564,7 +2563,7 @@ class Nifiab050e0c(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git maven && rm -rf /var/lib/apt/lists/*
@@ -2593,7 +2592,7 @@ class Storm4bc158f0(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-focal
 
 RUN apt-get update && apt-get install -y git maven python3 python2 build-essential && \\
@@ -2627,7 +2626,7 @@ class Dynamicdatasource1d7f40ec(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-focal
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2652,7 +2651,7 @@ class Bisqf2fe13d0(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2678,7 +2677,7 @@ class Tcctransaction874cb910(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8.5-openjdk-8-slim
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2706,7 +2705,7 @@ class Cate815e74d(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8-openjdk-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2735,7 +2734,7 @@ class Guava0bf87046(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2763,7 +2762,7 @@ class Tsunamisecurityscannercf018549(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gradle:8.5-jdk21
 
 USER root
@@ -2789,7 +2788,7 @@ class Hswebframework8c23cc95(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2818,7 +2817,7 @@ class CalendarViewf5479ea3(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk-focal
 
 # Configure multi-arch for AAPT2 (AMD64) on ARM64 host
@@ -2883,7 +2882,7 @@ class Analysisik9b820257(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-21
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2912,7 +2911,7 @@ class Mapdb8721c0e8(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:8-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2937,7 +2936,7 @@ class Keycloak051fcab5(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2967,7 +2966,7 @@ class Killbillf7d48b59(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-11
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -2997,7 +2996,7 @@ class Generatorc8cd0c8e(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3025,7 +3024,7 @@ class Mybatis359a0bcab(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3053,7 +3052,7 @@ class MybatisPageHelperb4212c4d(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3081,7 +3080,7 @@ class Plantuml783ae241(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git graphviz && rm -rf /var/lib/apt/lists/*
@@ -3105,7 +3104,7 @@ class Lettucefa5433c2(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM --platform=linux/amd64 maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3134,7 +3133,7 @@ class Picocli121646e4(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:11-jdk-focal
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3158,7 +3157,7 @@ class Runelite6e2d0b20(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3185,7 +3184,7 @@ class Springauthorizationserver7d72f556(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3210,7 +3209,7 @@ class Springbootf73a809c(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3236,7 +3235,7 @@ class Javapoetb9017a95(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.8-eclipse-temurin-8
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3264,7 +3263,7 @@ class CoreNLP1b7edd19(JavaProfile):
     timeout: int = 400  # Maven tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM maven:3.9.6-eclipse-temurin-17
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
@@ -3295,7 +3294,7 @@ class CloudReaderf5b9e67e(JavaProfile):
     timeout: int = 300  # Gradle tests can be slow
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk-jammy
 
 RUN apt-get update && apt-get install -y git wget unzip && rm -rf /var/lib/apt/lists/*

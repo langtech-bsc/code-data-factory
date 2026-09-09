@@ -23,7 +23,7 @@ dataset aims for two goals:
 * To be runnable in SWE-agent
 * To be easy to evaluate with our custom scripts.
 
-Usage: python -m swesmith.harness.gather logs/run_validation/<run_id>
+Usage: uv run python -m swesmith.harness.gather logs/run_validation/<run_id>
 """
 
 import argparse
@@ -35,16 +35,16 @@ import concurrent.futures
 import functools
 
 from pathlib import Path
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     PASS_TO_FAIL,
     PASS_TO_PASS,
     FAIL_TO_PASS,
-    KEY_INSTANCE_ID,
     LOG_REPORT,
 )
 from swesmith.constants import (
     GIT_APPLY_CMDS,
     KEY_IMAGE_NAME,
+    KEY_INSTANCE_ID,
     KEY_PATCH,
     KEY_TIMED_OUT,
     LOG_DIR_TASKS,
@@ -140,7 +140,7 @@ def _main(
     *,
     debug_subprocess: bool = False,
     override_branch: bool = False,
-    repush_image: bool = False,
+    refresh_sif: bool = False,
     verbose: bool = False,
 ):
     """
@@ -260,10 +260,10 @@ def _main(
             stats[k] += v
 
     if len(created_repos) > 0:
-        if repush_image:
-            print("Rebuilding + pushing images...")
+        if refresh_sif:
+            print("Rebuilding local Singularity images...")
             for repo in created_repos:
-                print(f"[{repo}] Rebuilding + pushing image")
+                print(f"[{repo}] Rebuilding local SIF")
                 registry.get(repo).push_image(rebuild_image=True)
 
     if len(task_instances) > 0:
@@ -615,9 +615,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-p",
-        "--repush_image",
+        "--refresh_sif",
         action="store_true",
-        help="Rebuild and push Docker image for repos (such that latest branches are included)",
+        help="Rebuild the local Singularity image cache for repos",
     )
     args = parser.parse_args()
 

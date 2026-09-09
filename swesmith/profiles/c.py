@@ -1,7 +1,7 @@
 import re
 
 from dataclasses import dataclass, field
-from swebench.harness.constants import TestStatus
+from swesmith.harness.constants import TestStatus
 from swesmith.constants import ENV_NAME
 from swesmith.profiles.base import RepoProfile, registry
 
@@ -26,7 +26,7 @@ class Jqb9e19de76(CProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive \
     DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -77,7 +77,7 @@ class Valkeyfc7c04e4(CProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC

@@ -1,21 +1,19 @@
 """
 Purpose: Given a repository, blank out various functions/classes, then ask the model to rewrite them.
 
-Usage: python -m swesmith.bug_gen.llm.rewrite \
+Usage: uv run python -m swesmith.bug_gen.llm.rewrite \
     --model <model> \
     repo  # e.g., tkrajina__gpxpy.09fc46b3
 
-Where model follows the litellm format.
+The model is served by the internal PTIE endpoint.
 
 Example:
 
-python -m swesmith.bug_gen.llm.rewrite tkrajina__gpxpy.09fc46b3 --model claude-3-7-sonnet-20250219
+uv run python -m swesmith.bug_gen.llm.rewrite tkrajina__gpxpy.09fc46b3 --model glm-5.3-flash
 """
 
 import argparse
 import json
-import litellm
-import logging
 import os
 import random
 import shutil
@@ -23,8 +21,6 @@ import subprocess
 import yaml
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from litellm import completion
-from litellm.cost_calculator import completion_cost
 from swesmith.bug_gen.llm.utils import (
     PROMPT_KEYS,
     extract_code_block,
@@ -45,13 +41,11 @@ from swesmith.profiles import registry
 from tqdm.auto import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 from typing import Any
+from swesmith.llm import PTIEError, complete
 
 
 LM_REWRITE = "lm_rewrite"
 
-logging.getLogger("LiteLLM").setLevel(logging.WARNING)
-litellm.drop_params = True
-litellm.suppress_debug_info = True
 random.seed(24)
 
 
@@ -121,10 +115,10 @@ def main(
         ]
         messages = [x for x in messages if x["content"]]
         try:
-            response: Any = completion(
+            response: Any = complete(
                 model=model, messages=messages, n=1, temperature=0
             )
-        except litellm.ContextWindowExceededError:
+        except PTIEError:
             return {"n_generation_failed": 1, "cost": 0.0}
         choice = response.choices[0]
         message = choice.message
@@ -140,7 +134,7 @@ def main(
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        cost = completion_cost(completion_response=response)
+        cost = 0.0
         rewrite = BugRewrite(
             rewrite=code_block,
             explanation=explanation,
@@ -199,7 +193,12 @@ if __name__ == "__main__":
         help="Path to the configuration file.",
         required=True,
     )
-    parser.add_argument("--model", type=str, help="Model to use for rewriting.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="glm-5.3-flash",
+        help="PTIE model to use for rewriting.",
+    )
     parser.add_argument(
         "-w", "--n_workers", type=int, help="Number of workers to use", default=1
     )

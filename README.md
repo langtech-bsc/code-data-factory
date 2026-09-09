@@ -25,16 +25,15 @@
 
 <hr />
 
-SWE-smith is a toolkit for training [SWE-agents](https://github.com/SWE-agent/SWE-agent). You can:
+SWE-smith is a toolkit for creating executable software engineering task data. You can:
 * Turn any Github repository into a [SWE-gym](https://github.com/SWE-Gym/SWE-Gym).
 * Create *unlimited* tasks (e.g., file localization, program repair, [SWE-bench](https://github.com/SWE-bench/SWE-bench)) for that repo.
-* Train an LM to become a better SWE ([SWE-agent-LM-32B](https://huggingface.co/SWE-bench/SWE-agent-LM-32B)).
 
 ## ⚒️ Build Environments
 If you're interested in turning a GitHub repository into a SWE-gym, install the package from [source](https://swesmith.com/getting_started/installation/).
 
 > [!TIP]
-> SWE-smith requires Docker to create execution environments. SWE-smith was developed and tested on Ubuntu 22.04.4 LTS.
+> SWE-smith creates Singularity images and runs on MN5 with Apptainer/Singularity. SWE-smith was developed and tested on Ubuntu 22.04.4 LTS.
 > We do *not* plan on supporting Windows or MacOS.
 
 You can then build a dataset for the repository by...
@@ -43,28 +42,9 @@ You can then build a dataset for the repository by...
 3. [Keep tasks that break 1+ unit tests](https://swesmith.com/guides/harnesses/)
 4. [Generating issue text for your tasks](https://swesmith.com/guides/issue_gen/)
 
-## 🏋️ Train SWE-agent's
-Training SWE-agent's using the [SWE-smith dataset](https://huggingface.co/datasets/SWE-bench/SWE-smith) is super simple.
-```python
-from swesmith.profiles import registry
-from datasets import load_dataset
-ds = load_dataset("SWE-bench/SWE-smith", split="train") # Loads all 52k task instances
-for task in ds:
-    rp = registry.get_from_inst(task)  # Get the RepoProfile for the task
-    container = rp.get_container(task) # Returns pointer to a Docker container with the task initialized
-
-    """TODO: Train!"""
-```
-
-SWE-smith has been used to
-* Fine-tune Qwen 2.5 Coder into SWE-agent-LM-32B (A +32% jump on SWE-bench Verified!) using [SWE-agent](https://github.com/SWE-agent/SWE-agent) [[Tutorial](https://swesmith.com/guides/train_swe_agent/)]
-* Perform GRPO style reinforcement learning using [SkyRL](https://github.com/NovaSky-AI/SkyRL)
-
 ## 💿 Resources
 * [52k Task Instances](https://huggingface.co/datasets/SWE-bench/SWE-smith)
-* [SWE-agent-LM-32B](https://huggingface.co/SWE-bench/SWE-agent-LM-32B); **40.2%** pass@1 on [SWE-bench Verified](https://huggingface.co/datasets/SWE-bench/SWE-bench_Verified)!
-* [26k SWE-agent Trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories), including the 5k SWE-agent-LM-32B was trained on.
-* [250+ Environments](https://github.com/SWE-bench/SWE-smith-envs), one Docker image per repo represented in SWE-smith.
+* [250+ Environments](https://github.com/SWE-bench/SWE-smith-envs), one Singularity image per repo represented in SWE-smith.
 
 And there's more coming!
 

@@ -644,5 +644,5 @@
             "failure": []
         }
     },
-    "model_name_or_path": "swesmith_gen__claude-3.7__t-0.00_p-1.00__c.2.00__exp9__ig_orig"
+    "model_name_or_path": "swesmith_gen__glm-5.3-flash__t-0.00_p-1.00__c.2.00__exp9__ig_orig"
 }

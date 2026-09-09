@@ -3,10 +3,8 @@ from swesmith.constants import ENV_NAME
 from unittest.mock import patch, MagicMock, mock_open
 from pathlib import Path
 
-# Mock docker import
-with patch("docker.from_env", return_value=MagicMock()):
-    from swesmith.profiles.python import PythonProfile, Addict75284f95, AutogradAc044f0d
-    from swesmith.profiles import registry
+from swesmith.profiles.python import PythonProfile, Addict75284f95, AutogradAc044f0d
+from swesmith.profiles import registry
 
 
 def test_python_profile_defaults():
@@ -23,31 +21,14 @@ def test_python_profile_defaults():
 
 
 def test_python_profile_build_image():
-    """Test PythonProfile.build_image method"""
+    """Test that the Python profile delegates image creation to the SIF builder."""
     profile = Addict75284f95()
-
-    mock_env_yml_content = "name: test_env\ndependencies:\n  - python=3.10"
-
-    m = mock_open(read_data=mock_env_yml_content)
-    with (
-        patch("builtins.open", m),
-        patch("swesmith.profiles.python.get_dockerfile_env", return_value="FROM test"),
-        patch("pathlib.Path.mkdir"),
-        patch("subprocess.run") as mock_run,
-    ):
+    m = mock_open(read_data="name: test_env")
+    with patch("builtins.open", m), patch.object(profile, "_build_sif") as build_sif:
         profile.build_image()
 
-        # Verify docker build was called via subprocess
-        mock_run.assert_called_once()
-        build_cmd = mock_run.call_args.args[0]
-        assert "docker build" in build_cmd
-        assert profile.image_name in build_cmd
-
-        # Verify that the Dockerfile was written via open()
-        m.assert_called()
-        written_content = ""
-        for c in m().write.call_args_list:
-            written_content += c.args[0]
+    build_sif.assert_called_once()
+    assert "FROM swebench/swesmith.x86_64:latest" in build_sif.call_args.args[0]
 
 
 def test_python_profile_log_parser():
@@ -218,16 +199,10 @@ test_file.py FAIL
 
 
 def test_python_profile_build_image_error_handling():
-    """Test PythonProfile.build_image error handling"""
+    """Test that SIF build errors are propagated."""
     profile = Addict75284f95()
-
-    mock_env_yml_content = "name: test_env\ndependencies:\n  - python=3.10"
-
-    with (
-        patch("builtins.open", mock_open(read_data=mock_env_yml_content)),
-        patch("swesmith.profiles.python.get_dockerfile_env", return_value="FROM test"),
-        patch("pathlib.Path.mkdir"),
-        patch("subprocess.run", side_effect=Exception("Build failed")),
+    with patch("builtins.open", mock_open(read_data="name: test_env")), patch.object(
+        profile, "_build_sif", side_effect=Exception("Build failed")
     ):
         with pytest.raises(Exception, match="Build failed"):
             profile.build_image()

@@ -1,12 +1,11 @@
 """
 Purpose: Given a pull request, mirror the bug in the current form of the repository.
 
-Usage: python -m swesmith.bug_gen.mirror.generate logs/prs/data/*-task-instances.jsonl
+Usage: uv run python -m swesmith.bug_gen.mirror.generate logs/prs/data/*-task-instances.jsonl
 """
 
 import argparse
 import json
-import litellm
 import logging
 import os
 import re
@@ -17,9 +16,7 @@ import signal
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dotenv import load_dotenv
-from litellm import completion, completion_cost
 from multiprocessing import current_process
-from swebench.harness.constants import KEY_INSTANCE_ID
 from swesmith.bug_gen.utils import (
     apply_patches,
     get_patch,
@@ -35,19 +32,16 @@ from swesmith.constants import (
     PREFIX_BUG,
     PREFIX_METADATA,
     INSTANCE_REF,
+    KEY_INSTANCE_ID,
 )
 from swesmith.profiles import registry, RepoProfile
+from swesmith.llm import complete
 from tqdm.auto import tqdm
 from unidiff import PatchSet
 
 load_dotenv()
-litellm.drop_params = True
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-logging.getLogger("LiteLLM").setLevel(logging.WARNING)
-litellm.suppress_debug_info = True
 
 MIRROR_PR = "pr_mirror"
 KEY_COST = "cost"
@@ -101,7 +95,7 @@ def should_attempt_recovery(
     return True, None
 
 
-def recover_sweb_inst(inst, repo, model, api_key=None, log_path=None):
+def recover_sweb_inst(inst, repo, model, log_path=None):
     """
     Given a pull request, mirror the bug in the current form of the repository.
 
@@ -165,7 +159,7 @@ def recover_sweb_inst(inst, repo, model, api_key=None, log_path=None):
         file_content = open(file_path).read()
 
         # Call llm generation
-        response = completion(
+        response = complete(
             model=model,
             messages=[
                 {"role": "user", "content": RECOVERY_PROMPT},
@@ -177,11 +171,10 @@ def recover_sweb_inst(inst, repo, model, api_key=None, log_path=None):
             ],
             n=1,
             temperature=0,
-            api_key=api_key,
         )
 
         # Perform rewrite
-        cost = completion_cost(completion_response=response)
+        cost = 0.0
         metadata[KEY_COST] += cost
         metadata[INSTANCE_REF] = inst
         output = response.choices[0].message.content.strip()  # type: ignore
@@ -246,7 +239,7 @@ def should_process_instance(inst, repo, redo_existing, redo_skipped):
 
 
 def process_single_instance(
-    inst, repo, model, api_key=None, max_files=8, max_lines=500, max_file_lines=10000
+    inst, repo, model, max_files=8, max_lines=500, max_file_lines=10000
 ):
     """Process a single instance with its own working directory."""
     global this_worker_id
@@ -306,9 +299,7 @@ def process_single_instance(
             os.remove(direct_patch)
 
         # Attempt to perform recovery
-        patch_files = recover_sweb_inst(
-            inst, repo, model, api_key=api_key, log_path=log_path
-        )
+        patch_files = recover_sweb_inst(inst, repo, model, log_path=log_path)
 
         if len(patch_files) == 0:
             return {"status": "recover_fail"}
@@ -364,7 +355,6 @@ def main(
     model: str,
     redo_existing: bool,
     redo_skipped: bool,
-    api_key: str | None = None,
     num_processes: int = 1,
     max_files: int = 8,
     max_lines: int = 500,
@@ -436,7 +426,6 @@ def main(
                 inst,
                 inst[MIRROR_PR],
                 model,
-                api_key,
                 max_files,
                 max_lines,
                 max_file_lines,
@@ -530,7 +519,7 @@ if __name__ == "__main__":
         "--model",
         type=str,
         help="Model to use for bug generation",
-        default="openai/gpt-4o",
+        default="glm-5.3-flash",
     )
     parser.add_argument(
         "--redo_existing",

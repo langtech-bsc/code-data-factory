@@ -42,7 +42,7 @@ def split_instances(input_list: list, n: int) -> list:
 
 def construct_data_files(data: dict):
     """
-    Logic for combining multiple .all PR files into a single fine tuning dataset
+    Logic for combining multiple .all PR files into a single task dataset
 
     Args:
         data (dict): Dictionary containing the following keys:
@@ -104,7 +104,7 @@ def main(
     cutoff_date: str = None,
 ):
     """
-    Spawns multiple threads given multiple GitHub tokens for collecting fine tuning data
+    Spawns multiple threads given multiple GitHub tokens for collecting task data
 
     Args:
         repos (list): List of repositories to retrieve instruction data for

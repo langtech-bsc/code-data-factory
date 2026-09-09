@@ -1,7 +1,7 @@
 """
 Purpose: Calculate the cost of generating bugs across all repositories
 
-Usage: python scripts/calculate_cost.py <bug_type (e.g. "lm_rewrite")>
+Usage: uv run python scripts/calculate_cost.py <bug_type (e.g. "lm_rewrite")>
 """
 
 import argparse

@@ -5,12 +5,10 @@ This module defines the abstract base class for repository profiles that specify
 installation and testing configurations for different repositories.
 """
 
-import docker
 import json
 import logging
 import os
 import platform
-import re
 import shutil
 import subprocess
 import urllib.error
@@ -19,7 +17,6 @@ import urllib.request
 from abc import ABC, abstractmethod, ABCMeta
 from collections import UserDict
 from dataclasses import dataclass, field
-from docker.models.containers import Container
 from dotenv import load_dotenv
 from functools import cached_property
 from ghapi.all import GhApi
@@ -28,19 +25,22 @@ from threading import Lock as ThreadLock
 
 # Note: swesmith.bug_gen.adapters is imported lazily in extract_entities() to avoid
 # loading tree-sitter dependencies when only using Registry/get_valid_report
-from swebench.harness.constants import (
-    DOCKER_USER,
-    DOCKER_WORKDIR,
-    FAIL_TO_PASS,
-    KEY_INSTANCE_ID,
-)
+from swesmith.harness.constants import FAIL_TO_PASS
 from swesmith.constants import (
+    KEY_INSTANCE_ID,
     KEY_PATCH,
     LOG_DIR_ENV,
     ORG_NAME_DH,
     ORG_NAME_GH,
     INSTANCE_REF,
     CodeEntity,
+)
+from swesmith.runtime.definition import translate_recipe
+from swesmith.runtime.singularity import (
+    SingularityRunner,
+    get_singularity_command,
+    make_workspace,
+    resolve_sif,
 )
 from unidiff import PatchSet
 
@@ -194,32 +194,17 @@ class RepoProfile(ABC, metaclass=SingletonMeta):
         return f"https://github.com/{self.owner}/{self.repo}.git"
 
     @property
-    def _docker_ssh_arg(self) -> str:
-        key_file = _find_ssh_key()
-        if key_file:
-            return f"--ssh default={key_file}"
-        if self._is_repo_private():
-            return "--ssh default"
-        return ""
-
-    @property
     def image_name(self) -> str:
         return f"{self.org_dh}/swesmith.{self.arch}.{self.owner}_1776_{self.repo}.{self.commit[:8]}".lower()
 
     @cached_property
     def _cache_image_exists(self) -> bool:
-        """Check if Docker image exists locally."""
-        try:
-            subprocess.run(
-                f"docker image inspect {self.image_name}",
-                shell=True,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return True
-        except subprocess.CalledProcessError:
-            return False
+        """Check whether the profile's SIF exists in the local cache."""
+        return self.image_path.exists()
+
+    @property
+    def image_path(self) -> Path:
+        return resolve_sif(self.image_name)
 
     @property
     def mirror_name(self):
@@ -285,57 +270,41 @@ class RepoProfile(ABC, metaclass=SingletonMeta):
                 self._cache_mirror_exists = False
         return self._cache_mirror_exists
 
-    def _prepare_dockerfile(self, content: str) -> str:
-        """Inject BuildKit syntax directive and SSH mount into all RUN instructions.
-
-        This ensures that SSH keys forwarded via `docker build --ssh` are
-        transparently available to every RUN step (e.g. git clone, git
-        submodule update) without requiring profile authors to remember
-        `--mount=type=ssh` themselves.  The mount uses `required=false` so
-        builds still succeed when no SSH agent is forwarded.
-        """
-        if not content.lstrip().startswith("# syntax=docker/dockerfile"):
-            content = "# syntax=docker/dockerfile:1\n" + content
-
-        # Inject GIT_SSH_COMMAND variable to the dockerfile. This ssh usage
-        # accepts the unknown host key by default and save it to ~/.ssh/.known_hosts
-        # which removes the user interaction requirement.
-        content = re.sub(
-            r"^(FROM\s+.+)$",
-            r'\1\nENV GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"',
-            content,
-            count=1,
-            flags=re.MULTILINE,
-        )
-
-        content = re.sub(
-            r"^RUN\s+(?!--mount=type=ssh)",
-            "RUN --mount=type=ssh,required=false ",
-            content,
-            flags=re.MULTILINE,
-        )
+    def _prepare_recipe(self, content: str) -> str:
+        """Return the profile recipe before Apptainer translation."""
         return content
 
-    def build_image(self):
-        """Build a Docker image (execution environment) for this repository profile."""
-        env_dir = LOG_DIR_ENV / self.repo_name
-        env_dir.mkdir(parents=True, exist_ok=True)
-        dockerfile_path = env_dir / "Dockerfile"
-        with open(dockerfile_path, "w") as f:
-            f.write(self._prepare_dockerfile(self.dockerfile))
-
-        build_cmd = (
-            f"docker build -f {dockerfile_path} --platform {self.pltf}"
-            f" --no-cache {self._docker_ssh_arg} -t {self.image_name} ."
-        )
+    def _build_sif(self, recipe: str, context_dir: Path) -> Path:
+        """Translate and build a profile recipe as a local SIF."""
+        env_dir = context_dir
+        definition_path = env_dir / "Singularity.def"
+        definition_path.write_text(translate_recipe(recipe, context_dir=env_dir))
+        destination = self.image_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
         with open(env_dir / "build_image.log", "w") as log_file:
             subprocess.run(
-                build_cmd,
+                [
+                    get_singularity_command(),
+                    "build",
+                    "--fakeroot",
+                    str(temporary),
+                    str(definition_path),
+                ],
                 check=True,
-                shell=True,
+                cwd=env_dir,
                 stdout=log_file,
                 stderr=subprocess.STDOUT,
             )
+        temporary.replace(destination)
+        self._cache_image_exists = True
+        return destination
+
+    def build_image(self):
+        """Build a Singularity image for this repository profile."""
+        env_dir = LOG_DIR_ENV / self.repo_name
+        env_dir.mkdir(parents=True, exist_ok=True)
+        self._build_sif(self.recipe, env_dir)
 
     def create_mirror(self):
         """Create a mirror of this repository at the specified commit."""
@@ -490,53 +459,81 @@ class RepoProfile(ABC, metaclass=SingletonMeta):
             shutil.rmtree(dir_path)
         return entities
 
-    def get_container(self, instance: dict) -> Container:
-        """Return a docker container with the task instance initialized"""
+    def get_container(self, instance: dict) -> SingularityRunner:
+        """Return a Singularity runner with the task instance initialized."""
         import uuid
 
-        client = docker.from_env()
-        self.pull_image()
+        self.require_image()
         instance_id = instance[KEY_INSTANCE_ID]
-        # Use unique suffix to avoid container name conflicts in parallel execution
-        container_name = f"{instance_id}.{uuid.uuid4().hex[:8]}"
-        container = client.containers.create(
-            image=self.image_name,
-            name=container_name,
-            user=DOCKER_USER,
-            detach=True,
-            command="tail -f /dev/null",
-            platform="linux/x86_64",
-            mem_limit="10g",
-        )
-        container.start()
-        val = container.exec_run(
-            f"git checkout {instance_id}",
-            workdir=DOCKER_WORKDIR,
-            user=DOCKER_USER,
-        )
-        if val.exit_code != 0:
-            raise RuntimeError(
-                f"Failed to checkout instance {instance_id} in container: {val.output.decode()}"
-            )
-        return container
-
-    def pull_image(self):
-        """Pull the Docker image for this repository profile."""
-        if self._cache_image_exists:
-            return
-
-        # Image doesn't exist locally, try to pull it
+        workspace_root = make_workspace(prefix=f"{instance_id}.{uuid.uuid4().hex[:8]}-")
+        workspace = workspace_root / "repo"
         try:
-            subprocess.run(f"docker pull {self.image_name}", shell=True, check=True)
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Failed to pull Docker image {self.image_name}: {e}")
+            self.clone(dest=str(workspace))
+        except Exception:
+            shutil.rmtree(workspace_root, ignore_errors=True)
+            raise
+        runner = SingularityRunner(self.image_path, workspace)
+        runner._owned_workspace = workspace_root
+        val = runner.exec_run(f"git checkout {instance_id}")
+        if val.exit_code != 0:
+            runner.close()
+            raise RuntimeError(
+                f"Failed to checkout instance {instance_id} in Singularity workspace: {val.output.decode()}"
+            )
+        return runner
+
+    def require_image(self) -> Path:
+        """Require a prebuilt SIF and explain how to create it when missing."""
+        image = self.image_path
+        if not image.exists():
+            raise FileNotFoundError(
+                f"Missing Singularity image for {self.repo_name}: {image}. "
+                "Run the dedicated image-build job or "
+                f"`uv run python -m swesmith.build_repo.create_images --repos {self.repo_name} -y`."
+            )
+        self._cache_image_exists = True
+        return image
+
+    def download_image(self) -> Path:
+        """Explicitly download the OCI image into the local SIF cache."""
+        destination = resolve_sif(self.image_name)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.exists():
+            self._cache_image_exists = True
+            return destination
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        try:
+            subprocess.run(
+                [
+                    get_singularity_command(),
+                    "pull",
+                    str(temporary),
+                    f"docker://{self.image_name}",
+                ],
+                check=True,
+            )
+            temporary.replace(destination)
+            self._cache_image_exists = True
+            return destination
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                f"Failed to download Singularity image {self.image_name}: {exc}"
+            ) from exc
+        finally:
+            temporary.unlink(missing_ok=True)
 
     def push_image(self, rebuild_image: bool = False):
+        """Build/update the shared SIF cache.
+
+        Remote registry publication is intentionally unsupported in the
+        Singularity runtime.  The method remains as a compatibility shim for
+        callers that used the old Docker workflow.
+        """
         if rebuild_image:
-            subprocess.run(f"docker rmi {self.image_name}", shell=True)
+            self._cache_image_exists = False
             self.build_image()
-        assert self._cache_image_exists, "Image must be built or pulled before pushing"
-        subprocess.run(f"docker push {self.image_name}", shell=True)
+        if not self._cache_image_exists:
+            self.require_image()
 
     def set_github_token(self, token: str):
         """Set a custom GitHub token and reset the API instance."""
@@ -667,8 +664,8 @@ class RepoProfile(ABC, metaclass=SingletonMeta):
         pass
 
     @property
-    def dockerfile(self) -> str:
-        """Return the Dockerfile path for this repository profile."""
+    def recipe(self) -> str:
+        """Return the recipe-compatible recipe for this profile."""
         pass
 
     ### END: Properties, Methods that require implementation ###

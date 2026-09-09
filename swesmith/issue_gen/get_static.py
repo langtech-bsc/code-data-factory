@@ -10,7 +10,8 @@ import random
 from typing import Set
 
 from pathlib import Path
-from swebench.harness.constants import FAIL_TO_PASS, KEY_INSTANCE_ID
+from swesmith.harness.constants import FAIL_TO_PASS
+from swesmith.constants import KEY_INSTANCE_ID
 from swesmith.bug_gen.procedural import MAP_EXT_TO_MODIFIERS
 from tqdm.auto import tqdm
 from unidiff import PatchSet

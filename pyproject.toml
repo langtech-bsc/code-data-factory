@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [
     {name = "John Yang", email = "byjohnyang@gmail.com"}
 ]
-description = "The official SWE-smith package - A toolkit for generating software engineering training data at scale."
+description = "The official SWE-smith package - A toolkit for generating executable software engineering task data at scale."
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["nlp", "benchmark", "code"]
@@ -20,7 +20,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-# Base dependencies are empty to allow granular dependency groups for Modal images
+# Base dependencies are empty to allow granular dependency groups.
 dependencies = []
 
 [project.optional-dependencies]
@@ -28,22 +28,15 @@ dependencies = []
 all = [
     "astor",
     "datasets",
-    "docker",
     "ghapi",
     "jinja2",
     "libcst",
-    "litellm",
     "matplotlib",
-    "modal",
-    "openai",
-    "portkey-ai",
     "pre-commit",
     "python-dotenv",
+    "pyyaml",
     "rich",
-    "sglang",
     "sparklines",
-    "swebench",
-    "tiktoken",
     "tqdm",
     "tree-sitter>=0.25",
     "tree-sitter-c",
@@ -71,26 +64,24 @@ test = [
     "pytest",
     "pytest-cov",
 ]
-# Minimal dependencies for remote validation (no sglang, litellm, openai, docker, etc.)
+# Minimal dependencies for validation.
 validate = [
     "ghapi",
     "python-dotenv",
+    "pyyaml",
     "rich",
-    "swebench",
     "unidiff",
     "tqdm",
 ]
-# Minimal dependencies for remote procedural bug generation (no sglang, litellm, openai, datasets, etc.)
+# Minimal dependencies for procedural bug generation.
 generate = [
     "astor",
-    "docker",
     "ghapi",
     "jinja2",
     "libcst",
-    "portkey-ai",
     "python-dotenv",
+    "pyyaml",
     "rich",
-    "swebench",
     "tqdm",
     "tree-sitter>=0.25",
     "tree-sitter-c",

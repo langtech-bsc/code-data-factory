@@ -1,7 +1,7 @@
 """
 Purpose: Given predictions by SWE-agent, evaluate its performance (% resolved).
 
-Usage: python -m swesmith.harness.eval \
+Usage: uv run python -m swesmith.harness.eval \
     --dataset_path <path to dataset> \
     --predictions_path <gold / path to predictions> \
     --run_id <unique identifier for this run> \
@@ -14,20 +14,24 @@ import os
 import threading
 
 from datasets import load_dataset
-from swebench.harness.constants import (
-    KEY_INSTANCE_ID,
-    KEY_MODEL,
-    KEY_PREDICTION,
+from swesmith.harness.constants import (
     LOG_REPORT,
     LOG_TEST_OUTPUT,
     RUN_EVALUATION_LOG_DIR,
 )
-from swebench.harness.docker_build import close_logger
 from tqdm.auto import tqdm
-from swesmith.constants import HF_DATASET, KEY_PATCH, KEY_TIMED_OUT
+from swesmith.constants import (
+    HF_DATASET,
+    KEY_INSTANCE_ID,
+    KEY_MODEL,
+    KEY_PATCH,
+    KEY_PREDICTION,
+    KEY_TIMED_OUT,
+)
 from swesmith.harness.grading import get_eval_report
 from swesmith.harness.utils import (
     matches_instance_filter,
+    close_logger,
     run_patch_in_container,
     run_threadpool,
 )

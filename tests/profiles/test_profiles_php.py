@@ -10,7 +10,7 @@ from swesmith.profiles.php import (
     parse_log_phpunit_testdox,
 )
 from swesmith.constants import ENV_NAME
-from swebench.harness.constants import TestStatus
+from swesmith.harness.constants import TestStatus
 
 
 def make_dummy_php_profile():
@@ -20,7 +20,7 @@ def make_dummy_php_profile():
         commit = "deadbeefcafebabe"
 
         @property
-        def dockerfile(self):
+        def recipe(self):
             return "FROM php:8.3\nRUN echo hello"
 
         def log_parser(self, log):
@@ -236,23 +236,23 @@ def test_get_test_files_cache_reuse():
     assert clone_count == 1
 
 
-def test_dbal_dockerfile():
+def test_dbal_recipe():
     profile = Dbalacb68b38()
-    assert "php:8.3" in profile.dockerfile
-    assert f"/{ENV_NAME}" in profile.dockerfile
-    assert "composer" in profile.dockerfile
+    assert "php:8.3" in profile.recipe
+    assert f"/{ENV_NAME}" in profile.recipe
+    assert "composer" in profile.recipe
 
 
-def test_monolog_dockerfile():
+def test_monolog_recipe():
     profile = Monolog6db20ca0()
-    assert "php:8.3" in profile.dockerfile
-    assert "ext-mongodb" in profile.dockerfile
+    assert "php:8.3" in profile.recipe
+    assert "ext-mongodb" in profile.recipe
 
 
-def test_guzzle_dockerfile():
+def test_guzzle_recipe():
     profile = Guzzlefb92d95f()
-    assert "php:8.3" in profile.dockerfile
-    assert "composer install" in profile.dockerfile
+    assert "php:8.3" in profile.recipe
+    assert "composer install" in profile.recipe
 
 
 def test_php_profile_defaults():

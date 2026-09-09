@@ -1,17 +1,17 @@
 from pathlib import Path
-from swebench.harness.constants import (
+from swesmith.harness.constants import (
     APPLY_PATCH_FAIL,
     FAIL_TO_FAIL,
     FAIL_TO_PASS,
-    KEY_PREDICTION,
     PASS_TO_FAIL,
     PASS_TO_PASS,
     TESTS_TIMEOUT,
     ResolvedStatus,
     TestStatus,
 )
-from swebench.harness.grading import get_resolution_status
+from swesmith.harness.constants import get_resolution_status
 from swesmith.constants import (
+    KEY_PREDICTION,
     TEST_OUTPUT_END,
     TEST_OUTPUT_START,
 )

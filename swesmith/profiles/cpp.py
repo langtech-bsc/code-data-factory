@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass, field
-from swebench.harness.constants import TestStatus
+from swesmith.harness.constants import TestStatus
 from swesmith.profiles.base import RepoProfile, registry
 from swesmith.constants import ENV_NAME
 
@@ -788,7 +788,7 @@ class Waybard527ccd4(CppProfile):
     test_cmd: str = "meson test -C build --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -846,7 +846,7 @@ class FTXUIf73d92d3(CppProfile):
     test_cmd: str = "cd build && ./ftxui-tests --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -877,7 +877,7 @@ class LibreCAD7a288fff(CppProfile):
     test_cmd: str = "cd build && ./librecad_tests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -923,7 +923,7 @@ class LibreSprite85ced3b6(CppProfile):
     test_cmd: str = "cd build && ninja -k 0 || true"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -981,7 +981,7 @@ class Magicenumc1aa6de9(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -1012,7 +1012,7 @@ class OpenRCT2f228d738(CppProfile):
     test_cmd: str = "cd build && ./openrct2-cli scan-objects && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1075,7 +1075,7 @@ class OpenTTDae80a47c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1120,7 +1120,7 @@ class Qv2rayd5c5aeb3(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1170,7 +1170,7 @@ class Rapidjson24b5e7a8(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y git cmake build-essential && rm -rf /var/lib/apt/lists/*
@@ -1197,7 +1197,7 @@ class WasmEdgecb41f751(CppProfile):
     test_cmd: str = 'export LD_LIBRARY_PATH="/app/build/lib/api:$LD_LIBRARY_PATH" && cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1250,7 +1250,7 @@ class ImHexf4768420(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1313,7 +1313,7 @@ class Albert897c7797(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -1365,7 +1365,7 @@ class Brpcd22fa17f(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1417,7 +1417,7 @@ class Aria2b4fd7cb1(CppProfile):
     test_cmd: str = "cd test && ./aria2c"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1488,7 +1488,7 @@ class Btopabcb906c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:14
 
 RUN apt-get update && apt-get install -y \
@@ -1518,7 +1518,7 @@ class Libtorrentf0f8a352(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1 -j$(nproc)"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1564,7 +1564,7 @@ class Asepriteda0d3228(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1608,7 +1608,7 @@ class Retdec8be53bbd(CppProfile):
     test_cmd: str = 'find build/tests -name "retdec-tests-*" -type f -executable -exec {} --gtest_color=no \\;'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1651,7 +1651,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "find . -name tests -type f -executable -exec {} \\;"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:24.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -1701,7 +1701,7 @@ class Azerothcorewotlk3ffbbe98(CppProfile):
     test_cmd: str = "cd build && ./src/test/unit_tests --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1745,7 +1745,7 @@ class ArduinoJsonaa7fbd6c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y git cmake && rm -rf /var/lib/apt/lists/*
@@ -1770,7 +1770,7 @@ class Conky4f829244(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1832,7 +1832,7 @@ class Cuberite7fd3fa5c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -1867,7 +1867,7 @@ class Cppcheck67606e6e(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1904,7 +1904,7 @@ class DevilutionXafdaa2ac(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -1957,7 +1957,7 @@ class Doctest1da23a3e(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -1988,7 +1988,7 @@ class Doxygencbd8c4bc(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2023,7 +2023,7 @@ class Dragonfly14103bde(CppProfile):
     test_cmd: str = "cd build-opt && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2067,7 +2067,7 @@ class Drogon34955222(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2117,7 +2117,7 @@ class Duckdbcb9e7c21(CppProfile):
     test_cmd: str = './build/test/unittest "[common]" -s'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2152,7 +2152,7 @@ class Endlesskyf1dba50f(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2182,7 +2182,7 @@ class Falco43aaffc4(CppProfile):
     test_cmd: str = "cd build && ./unit_tests/falco_unit_tests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2230,7 +2230,7 @@ class Spdlog472945ba(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -2255,7 +2255,7 @@ class Ggwave3b877d07(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2285,7 +2285,7 @@ class Benchmarkeed8f5c6(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -2321,7 +2321,7 @@ class Bloatya277a440(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2356,7 +2356,7 @@ class Dracob91aa918(CppProfile):
     test_cmd: str = "./build/draco_tests --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -2387,7 +2387,7 @@ class Glog53d58e45(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2419,7 +2419,7 @@ class Googletest5a9c3f9e(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2450,7 +2450,7 @@ class Highway224b014b(CppProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -2483,7 +2483,7 @@ class Leveldbac691084(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -2514,7 +2514,7 @@ class Sentencepiece0f4ca43a(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2548,7 +2548,7 @@ class Snappyda459b52(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -2582,7 +2582,7 @@ class Gperftoolsa4724315(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2618,7 +2618,7 @@ class Grpc9d7a53ea(CppProfile):
     test_cmd: str = "bazel test --enable_bzlmod=false --test_output=all --nocache_test_results //test/core/filters:filter_test_test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2667,7 +2667,7 @@ class Halidec2a6e34e(CppProfile):
     test_cmd: str = 'cd build && ctest -R "^_test_internal$" --verbose'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2723,7 +2723,7 @@ class Inputleap34a34fb2(CppProfile):
     test_cmd: str = "cd /app/build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2768,7 +2768,7 @@ class Yamlcpp2e6383d2(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2803,7 +2803,7 @@ class Keepassxc5bd42c47(CppProfile):
     test_cmd: str = "export CTEST_OUTPUT_ON_FAILURE=1 && xvfb-run -a --server-args='-screen 0 1024x768x24' ninja -C build test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2865,7 +2865,7 @@ class QuantLiba05b6ab3(CppProfile):
     test_cmd: str = "cd build/test-suite && ./quantlib-test-suite --log_level=all --report_level=detailed"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2902,7 +2902,7 @@ class Ledger920059e6(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -2957,7 +2957,7 @@ class Stablediffusioncppf0f641a1(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -2991,7 +2991,7 @@ class Tinyxml23324d04d(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -3018,7 +3018,7 @@ class Cpr22a41e60(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y     cmake     git     libcurl4-openssl-dev     libssl-dev     zlib1g-dev     meson     ninja-build     pkg-config     python3-pip     && rm -rf /var/lib/apt/lists/*
@@ -3043,7 +3043,7 @@ class Luantifc363085(CppProfile):
     test_cmd: str = "./bin/luanti --run-unittests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3098,7 +3098,7 @@ class Luau54a2ea00(CppProfile):
     test_cmd: str = "./build/Luau.UnitTest --reporters=console --no-colors"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y     build-essential     cmake     git     && rm -rf /var/lib/apt/lists/*
@@ -3123,7 +3123,7 @@ class AirSim13448700(CppProfile):
     test_cmd: str = "echo '[==========] Running 1 test'; ./build_release/output/bin/AirLibUnitTests || true; echo '[  PASSED  ] AirLibUnitTests.Main'"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -3165,7 +3165,7 @@ class GSL756c91ab(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -3197,7 +3197,7 @@ class Magnumf3a4ce7d(CppProfile):
     test_cmd: str = "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3242,7 +3242,7 @@ class Mumble997ecba9(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3314,7 +3314,7 @@ class Ninjacc60300a(CppProfile):
     test_cmd: str = "./build/ninja_test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -3344,7 +3344,7 @@ class Oatppf83d648f(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y     build-essential     cmake     git     && rm -rf /var/lib/apt/lists/*
@@ -3368,7 +3368,7 @@ class Jsoncppe799ca05(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake python3 git && rm -rf /var/lib/apt/lists/*
@@ -3395,7 +3395,7 @@ class OpenMVGc76d8724(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3451,7 +3451,7 @@ class Opencvaea90a9e(CppProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3506,7 +3506,7 @@ class Srs6e2392f3(CppProfile):
     test_cmd: str = "./objs/srs_utest --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3546,7 +3546,7 @@ class Polybarf99e0b1c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3611,7 +3611,7 @@ class Recastnavigation13f43344(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -3647,7 +3647,7 @@ class Seastar7e457cf7(CppProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3713,7 +3713,7 @@ class Entte08302e1(CppProfile):
     test_cmd: str = "cd build_dir && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y     cmake     git     build-essential     && rm -rf /var/lib/apt/lists/*
@@ -3739,7 +3739,7 @@ class Snapcast439dc886(CppProfile):
     test_cmd: str = "/app/bin/snapcast_test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3786,7 +3786,7 @@ class Sqlitebrowser95f92180(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3829,7 +3829,7 @@ class Supercollider438bf480(CppProfile):
     test_cmd: str = "export QT_QPA_PLATFORM=offscreen && cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -3903,7 +3903,7 @@ class Taskflowd8776bc0(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -3935,7 +3935,7 @@ class OneTBB3ebfedd8(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -3970,7 +3970,7 @@ class Websocketpp4dfe1be7(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:12-bullseye
 
 RUN apt-get update && apt-get install -y \
@@ -4014,7 +4014,7 @@ class Libzmq51a5a9cb(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -4067,7 +4067,7 @@ class OpenColorIOeaa02817(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4107,7 +4107,7 @@ class BehaviorTreeCPP3ff6a32b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4157,7 +4157,7 @@ class CLI11fe3772d3(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -4189,7 +4189,7 @@ class ChaiScript2eb3279c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4226,7 +4226,7 @@ class Crowb8c021a7(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4267,7 +4267,7 @@ class Cytopiab67e255d(CppProfile):
     test_cmd: str = "export HOME=/tmp XDG_RUNTIME_DIR=/tmp SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy && cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4355,7 +4355,7 @@ class Descent3156cba8a(CppProfile):
     test_cmd: str = "cd builds/linux && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4432,7 +4432,7 @@ class Etlc6006057(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git build-essential && rm -rf /var/lib/apt/lists/*
@@ -4457,7 +4457,7 @@ class Ugrepd624720b(CppProfile):
     test_cmd: str = "make test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -4497,7 +4497,7 @@ class Srtce54b5ea(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4534,7 +4534,7 @@ class Heaptrackf16e8d33(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4586,7 +4586,7 @@ class Kdenlivefba388ba(CppProfile):
     test_cmd: str = "cd build && ctest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4660,7 +4660,7 @@ class VulkanHpp39609625(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4696,7 +4696,7 @@ class Glslange966816a(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -4732,7 +4732,7 @@ class VTK28b49bee(CppProfile):
     test_cmd: str = "cd build && ctest -R CommonCore --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4777,7 +4777,7 @@ class Server637f8c4d(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4826,7 +4826,7 @@ class EternalTerminal90b10d5f(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4880,7 +4880,7 @@ class Launcher4aa2b3ce(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4924,7 +4924,7 @@ class Ikosac7f7c17(CppProfile):
     test_cmd: str = "cd build && make check"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -4983,7 +4983,7 @@ class Cutlass3476ddb7(CppProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
 
 RUN apt-get update && apt-get install -y git cmake make g++ python3 python3-pip && rm -rf /var/lib/apt/lists/*
@@ -5019,7 +5019,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM gcc:12
 
 # RUN apt-get update && apt-get install -y \
@@ -5054,7 +5054,7 @@ class Pikiwidb44848409(CppProfile):
     test_cmd: str = "mkdir -p src && cp ./output/pika src/redis-server && cp ./output/pika tests/integration/pika && cp tests/conf/pika.conf tests/assets/default.conf && tclsh tests/test_helper.tcl --clients 1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5094,7 +5094,7 @@ class CTranslate2226c95d9(CppProfile):
     test_cmd: str = "cd build && ./tests/ctranslate2_test --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5136,7 +5136,7 @@ class Osrmbackend362b388d(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5180,7 +5180,7 @@ class I2pd8ab7cfa2(CppProfile):
     test_cmd: str = 'cd tests && for TEST in test-http-merge_chunked test-http-req test-http-res test-http-url test-http-url_decode test-gost test-gost-sig test-base-64 test-aeadchacha20poly1305 test-blinding test-elligator test-eddsa test-aes; do echo "Running $TEST"; ./$TEST || exit 1; done'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -5212,7 +5212,7 @@ class Jakt3c8d7508(CppProfile):
     test_cmd: str = "./build/bin/jakttest"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5255,7 +5255,7 @@ class Plog2ab53dc7(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -5279,7 +5279,7 @@ class Supertux53884267(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5330,7 +5330,7 @@ class TNNf0cb0812(CppProfile):
     test_cmd: str = "./build/test/unit_test/unit_test --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -5370,7 +5370,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build && make -j$(nproc) tendisplus_unit_test && ./bin/tendisplus_unit_test --gtest_color=no"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -5416,7 +5416,7 @@ class Ncnna64aa7ff(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5453,7 +5453,7 @@ class Sol2c1f95a77(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5493,7 +5493,7 @@ class Tigervncaf48f2c8(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5556,7 +5556,7 @@ class PowerInfer59df1750(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5593,7 +5593,7 @@ class TileDB13d41286(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1 -L unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 # Setup home environment
@@ -5654,7 +5654,7 @@ class Cereala56bad8b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -5686,7 +5686,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "./build/vita3k/module/module-tests"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -5745,7 +5745,7 @@ class Vowpalwabbit0d344494(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5786,7 +5786,7 @@ class Wabt6ca912cf(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -5819,7 +5819,7 @@ class Easyloggingpp63032b87(CppProfile):
     test_cmd: str = "./build/bin/easyloggingpp-unit-tests --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y git cmake build-essential libgtest-dev && rm -rf /var/lib/apt/lists/*
@@ -5845,7 +5845,7 @@ class Singaa64d65fa(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5899,7 +5899,7 @@ class Thrift32776c0f(CppProfile):
     test_cmd: str = "cd cmake-build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -5950,7 +5950,7 @@ class Asmjit64a88ed1(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -5985,7 +5985,7 @@ class Assimp3e672ff8(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -6019,7 +6019,7 @@ class Asyncprofilerdbd9fc75(CppProfile):
     test_cmd: str = "make test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM eclipse-temurin:17-jdk
 
 RUN apt-get update && apt-get install -y git build-essential g++ make cmake python3 && rm -rf /var/lib/apt/lists/*
@@ -6043,7 +6043,7 @@ class Audiowaveform9edb233c(CppProfile):
     test_cmd: str = "cd build && ./audiowaveform_tests --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6091,7 +6091,7 @@ class Bitcoin76eb04b1(CppProfile):
     test_cmd: str = "ctest --test-dir build --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6135,7 +6135,7 @@ class Backwardcpp0bfd0a07(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6175,7 +6175,7 @@ class Beast9ad3b683(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6217,7 +6217,7 @@ class Ccache85a885b2(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6266,7 +6266,7 @@ class Ceressolvera2bab5af(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6305,7 +6305,7 @@ class Openh264cf568c83(CppProfile):
     test_cmd: str = "./codec_unittest"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 # nasm is required for optimized assembly code
@@ -6336,7 +6336,7 @@ class Clementinebb2f6378(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6407,7 +6407,7 @@ class Osiris482d672b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM --platform=linux/amd64 ubuntu:24.04
 
 # Avoid interactive prompts
@@ -6446,7 +6446,7 @@ class Xgboostafdc0372(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6490,7 +6490,7 @@ class NumCpp3bbce083(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6525,7 +6525,7 @@ class FastDDSe516400f(CppProfile):
     test_cmd: str = 'cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1 -E "BlackboxTest"'
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6578,7 +6578,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "bash -c 'mkdir -p /tmp/fsw_test && timeout 5s ./build/test/src/fswatch_test /tmp/fsw_test > test_run.log 2>&1 || true && if [ -f ./build/test/src/fswatch_test ]; then echo \"1 tests, 1 passing\"; else exit 1; fi'"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM alpine:3.18
 
 # RUN apk add --no-cache \
@@ -6612,7 +6612,7 @@ class Rangev3ca1388fb(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -6644,7 +6644,7 @@ class Arduino7b0ac416(CppProfile):
     test_cmd: str = "cd tests/host && make FORCE32=0 OPTZ=-O0 CI"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6683,7 +6683,7 @@ class Esphomeb134c467(CppProfile):
     test_cmd: str = "pytest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y \
@@ -6717,7 +6717,7 @@ class Yoga8b42116d(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y     cmake     git     python3     && rm -rf /var/lib/apt/lists/*
@@ -6743,7 +6743,7 @@ class Faiss7cfb2500(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6789,7 +6789,7 @@ class Fastfloat9f30728c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -6814,7 +6814,7 @@ class Sqliteorm69917bd0(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -6846,7 +6846,7 @@ class Gflags53193503(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -6877,7 +6877,7 @@ class Ggmld6754f3d(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -6907,7 +6907,7 @@ class Llamacpp24464195(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -6941,7 +6941,7 @@ class Whispercpp21411d81(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -6978,7 +6978,7 @@ class Cherrytree6c42a114(CppProfile):
     test_cmd: str = "export HOME=/tmp && cd build && xvfb-run ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7028,7 +7028,7 @@ class Cpufeatures545431d6(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -7056,7 +7056,7 @@ class Mujoco82e92cbc(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7108,7 +7108,7 @@ class Filament770ce7f8(CppProfile):
     test_cmd: str = "cd out/cmake-release && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7173,7 +7173,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -7209,7 +7209,7 @@ class Parallelhashmap8442f1c8(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -7234,7 +7234,7 @@ class Ozzanimation6cbdc790(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
@@ -7272,7 +7272,7 @@ class Compiletimeregularexpressions62252118(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y git cmake build-essential && rm -rf /var/lib/apt/lists/*
@@ -7297,7 +7297,7 @@ class Coost0e89c366(CppProfile):
     test_cmd: str = "./build/bin/unitest"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -7330,7 +7330,7 @@ class Iree3f630a72(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1 -L 'driver=local-task|driver=local-sync'"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 # Prevent interactive prompts
@@ -7389,7 +7389,7 @@ class Cxxopts370de72b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y git cmake && rm -rf /var/lib/apt/lists/*
@@ -7416,7 +7416,7 @@ class Jellyfindesktop676758b6(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7468,7 +7468,7 @@ class Nanoflannba47cfcb(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -7500,7 +7500,7 @@ class QView801b0738(CppProfile):
     test_cmd: str = "cd build && xvfb-run ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7543,7 +7543,7 @@ class Sherpaonnxcb0828a0(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7586,7 +7586,7 @@ class Openalsoft32759d3c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1 --gtest_color=no"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7629,7 +7629,7 @@ class Bkcrack1f34dd5e(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
@@ -7659,7 +7659,7 @@ class Kleeefa1e052(CppProfile):
     test_cmd: str = "cd build && make systemtests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7718,7 +7718,7 @@ class Kokkos21a05468(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -7754,7 +7754,7 @@ class Ksnipc0537020(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7819,7 +7819,7 @@ class Libigl6000ccb7(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1 -R igl_core"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7879,7 +7879,7 @@ class Tippecanoeb677e360(CppProfile):
     test_cmd: str = "make test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM alpine:3.18
 
 RUN apk add --no-cache \
@@ -7910,7 +7910,7 @@ class Kakouneea233559(CppProfile):
     test_cmd: str = "./test/run"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -7941,7 +7941,7 @@ class DirectXShaderCompiler6f759a31(CppProfile):
     test_cmd: str = "cmake --build build --target check-all"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7986,7 +7986,7 @@ class LightGBMe3d52709(CppProfile):
     test_cmd: str = "pytest tests/python_package_test/ --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8032,7 +8032,7 @@ class Proxydc3d95c7(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y     cmake     git     build-essential     libgtest-dev     python3     && rm -rf /var/lib/apt/lists/*
@@ -8057,7 +8057,7 @@ class Veronabfca50d1(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --timeout 400"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8115,7 +8115,7 @@ class RmlUi1bf04a3c(CppProfile):
     test_cmd: str = "cd build && ./rmlui_unit_tests --success"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -8157,7 +8157,7 @@ class Pyodbccfe0575c(CppProfile):
     test_cmd: str = "pytest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y \
@@ -8188,7 +8188,7 @@ class Mlx6304c285(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8244,7 +8244,7 @@ class Ender3V2S181f8b256(CppProfile):
     test_cmd: str = "platformio run -e linux_native_test -t test-marlin"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM python:3.11-bookworm
 
 RUN apt-get update && apt-get install -y \
@@ -8288,7 +8288,7 @@ class Cppipc2e28547c(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -8321,7 +8321,7 @@ class Nghttp2cd3c0126(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
@@ -8361,7 +8361,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -8406,7 +8406,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build_debug && ctest --verbose --output-on-failure"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -8449,7 +8449,7 @@ class Quill7c0ffa54(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8482,7 +8482,7 @@ class Openthreadb81da07a(CppProfile):
     test_cmd: str = "./script/test unit"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8526,7 +8526,7 @@ class Panda3d2d2bdc9a(CppProfile):
     test_cmd: str = "export PYTHONPATH=$PWD/built && export LD_LIBRARY_PATH=$PWD/built/lib && export LIBGL_ALWAYS_SOFTWARE=1 && export EGL_PLATFORM=surfaceless && python3 -m pytest tests"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8590,7 +8590,7 @@ class Pistache8a1ac905(CppProfile):
     test_cmd: str = "meson test -C build --verbose --no-rebuild"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8638,7 +8638,7 @@ class Projectmf67dac94(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8683,7 +8683,7 @@ class PrusaFirmwaref3e0dfd4(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -8717,7 +8717,7 @@ class QTox2b9cbdca(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8806,7 +8806,7 @@ class QBittorrentf68f332f(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM debian:trixie-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8854,7 +8854,7 @@ class Qpdf9352f6f8(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8899,7 +8899,7 @@ class Qtcreatoree5a1883(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure -L auto"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8952,7 +8952,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "make check VERBOSE=1"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -9003,7 +9003,7 @@ class Sqlpp116180ee5e(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -9042,7 +9042,7 @@ class Librealsense78cb605b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9084,7 +9084,7 @@ class Miniz4b9fcf1d(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -9115,7 +9115,7 @@ class Librimede4700e9(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9174,7 +9174,7 @@ class Openrw5c5f266b(CppProfile):
     )
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9228,7 +9228,7 @@ class Libsass9bb4ebcc(CppProfile):
     test_cmd: str = "make -C test test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y git automake autoconf libtool make g++ ruby && rm -rf /var/lib/apt/lists/*
@@ -9260,7 +9260,7 @@ class PcapPlusPlus2a39a25b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -9292,7 +9292,7 @@ class Uvwbf9c298e(CppProfile):
     test_cmd: str = "cd build_dir && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -9325,7 +9325,7 @@ class Socketioclientcpp3b7be7e4(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM alpine:3.18
 
 RUN apk add --no-cache \
@@ -9358,7 +9358,7 @@ class Annoy379f7446(CppProfile):
     test_cmd: str = "pytest test/ -v"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y     git     build-essential     python3-dev     && rm -rf /var/lib/apt/lists/*
@@ -9385,7 +9385,7 @@ class Strawberry5aabf649(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9466,7 +9466,7 @@ class Subsurface59455fbf(CppProfile):
     test_cmd: str = "export QT_QPA_PLATFORM=offscreen HOME=/tmp XDG_RUNTIME_DIR=/tmp && mkdir -p /tmp/.cache /tmp/.config /tmp/.local/share && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9545,7 +9545,7 @@ class Tinygltfbdc37385(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -9577,7 +9577,7 @@ class Taichiba0e81dc(CppProfile):
     test_cmd: str = "pytest tests/python/test_basics.py"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9647,7 +9647,7 @@ class PEGTL54a2e32b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM alpine:3.18
 
 RUN apk add --no-cache \
@@ -9676,7 +9676,7 @@ class Ultrajsond708b05a(CppProfile):
     test_cmd: str = "pytest --verbose"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y git build-essential && rm -rf /var/lib/apt/lists/*
@@ -9703,7 +9703,7 @@ class Uncrustify7e055694(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y git cmake python3 && rm -rf /var/lib/apt/lists/*
@@ -9728,7 +9728,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # RUN apt-get update && apt-get install -y \
@@ -9761,7 +9761,7 @@ class Upxbe1ca792(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -9793,7 +9793,7 @@ class Nebula5d43e44b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9825,7 +9825,7 @@ RUN pip3 install --no-cache-dir "setuptools<60" "wheel" "Cython<3.0" && \
     sed -i 's/pyyaml==5.4/pyyaml>=5.4/g' tests/requirements.txt && \
     pip3 install --no-cache-dir -r tests/requirements.txt || pip3 install --no-cache-dir pytest pytest-xdist pytest-bdd pyyaml
 
-# Configure the build. To ensure the Dockerfile builds successfully in this environment, 
+# Configure the build. To ensure the recipe builds successfully in this environment,
 # we configure but don't perform a full heavy build of all tests which times out.
 RUN mkdir build && cd build && \
     cmake -DENABLE_TESTING=OFF -DCMAKE_BUILD_TYPE=Release ..
@@ -9844,7 +9844,7 @@ class Visualboyadvancemb58b2478(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9893,7 +9893,7 @@ class Xsimd548b05f0(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -9924,7 +9924,7 @@ class Xtensor18f65248(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9972,7 +9972,7 @@ class MTranServer99b97d5e(CppProfile):
     test_cmd: str = "bun test"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM oven/bun:1
 
 # Install git and other potential build dependencies
@@ -10007,7 +10007,7 @@ class Cppjieba9408c1d0(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y cmake git && rm -rf /var/lib/apt/lists/*
@@ -10035,7 +10035,7 @@ class Cppzmq041f755b(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10075,7 +10075,7 @@ class Pugixml71005206(CppProfile):
     test_cmd: str = "cd build && ./pugixml-check"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM gcc:11
 
 RUN apt-get update && apt-get install -y \
@@ -10106,7 +10106,7 @@ CMD ["/bin/bash"]"""
 #     test_cmd: str = "cd build/test && ./test_kuiper --gtest_color=no"
 
 #     @property
-#     def dockerfile(self):
+#     def recipe(self):
 #         return f"""FROM ubuntu:22.04
 
 # ENV DEBIAN_FRONTEND=noninteractive
@@ -10172,7 +10172,7 @@ class Zncad7bd6d7(CppProfile):
     test_cmd: str = "cd build && ctest --verbose --output-on-failure --rerun-failed --repeat until-pass:1"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -10217,7 +10217,7 @@ class Pycdca05ddec0(CppProfile):
     test_cmd: str = "cd build && python3 ../tests/run_tests.py"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -10247,7 +10247,7 @@ class Fastllmb5ff6009(CppProfile):
     test_cmd: str = "./build/testOps"
 
     @property
-    def dockerfile(self):
+    def recipe(self):
         return f"""FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
