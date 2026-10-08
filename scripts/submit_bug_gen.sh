@@ -27,7 +27,8 @@ usage() {
 Options:
   --language NAME              Profile language (default: javascript)
   --repos OWNER/REPO,...       Restrict the run to repositories
-  --phases LIST                 Comma-separated phases (default: gen,val,gather,issue)
+  --phases LIST                 Comma-separated phases: gen,val,gather,issue,reconstruct
+                                (default: gen,val,gather,issue; reconstruct is opt-in)
   --repo-workers N              Concurrent generation repositories (default: 4)
   --workers N                  Validation workers per repository (default: 1)
   --issue-gen-workers N         Issue-generation workers (default: 4)
@@ -97,7 +98,7 @@ IFS=',' read -r -a phase_list <<< "$PHASES"
 for phase in "${phase_list[@]}"; do
   [[ -n "$phase" ]] || continue
   case "$phase" in
-    gen|val|gather|issue) ;;
+    gen|val|gather|issue|reconstruct) ;;
     *) echo "Invalid phase: $phase" >&2; exit 2 ;;
   esac
   dependency="afterany:$previous"

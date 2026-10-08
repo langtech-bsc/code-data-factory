@@ -21,6 +21,12 @@ from typing import Callable
 
 from swesmith.constants import LOG_DIR_BUG_GEN, LOG_DIR_RUN_VALIDATION, LOG_DIR_TASKS
 from swesmith.profiles import registry
+from swesmith.profiles.python import PythonProfile
+from swesmith.reconstruct.generate import (
+    ReconstructConfig,
+    build_reconstruction_tasks,
+    task_file_path,
+)
 from swesmith.runtime.status import phase_failed, run_statused, status_path
 
 
@@ -129,6 +135,24 @@ def issue_repo(repo: str, args: argparse.Namespace) -> dict:
     return {"dataset": str(dataset_path)}
 
 
+def reconstruct_repo(repo: str, args: argparse.Namespace) -> dict:
+    """Build source-only reconstruction tasks. Python profiles with a SIF only."""
+    profile = registry.get(repo)
+    if not isinstance(profile, PythonProfile):
+        return {"skipped": True, "reason": "reconstruction supports Python profiles only"}
+    if not profile.image_path.exists():
+        print(f"Skipping reconstruct for {repo}: image {profile.image_path} is missing", flush=True)
+        return {"skipped": True, "reason": "missing SIF image"}
+    print(f"\n=== RECONSTRUCT {repo} ===", flush=True)
+    config = ReconstructConfig(
+        target=args.reconstruct_target,
+        max_candidates=args.reconstruct_max_candidates,
+        seed=args.seed,
+    )
+    tasks = build_reconstruction_tasks(repo, config)
+    return {"tasks": len(tasks), "task_file": str(task_file_path(repo))}
+
+
 def _run_phase(
     phase: str,
     repos: list[str],
@@ -191,7 +215,7 @@ def main(args: argparse.Namespace) -> int:
         return 0
 
     phases = [phase.strip() for phase in args.phases.split(",") if phase.strip()]
-    unknown = set(phases) - {"gen", "val", "gather", "issue"}
+    unknown = set(phases) - {"gen", "val", "gather", "issue", "reconstruct"}
     if unknown:
         raise SystemExit(f"Unknown phases: {sorted(unknown)}")
 
@@ -203,6 +227,7 @@ def main(args: argparse.Namespace) -> int:
         "val": validate_repo,
         "gather": gather_repo,
         "issue": issue_repo,
+        "reconstruct": reconstruct_repo,
     }
     phase_failures = False
     for phase in phases:
@@ -237,6 +262,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--issue-gen-workers", type=int, default=4)
     parser.add_argument("--issue-gen-config", default="configs/issue_gen/ig_v2.yaml")
     parser.add_argument("--issue-model", default="glm-5.3-flash")
+    parser.add_argument("--reconstruct-target", type=int, default=5)
+    parser.add_argument("--reconstruct-max-candidates", type=int, default=50)
     parser.add_argument("--redo-existing", action="store_true")
     parser.add_argument("--show-stats", action="store_true")
     parser.add_argument(

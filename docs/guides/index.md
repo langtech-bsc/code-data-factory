@@ -51,6 +51,14 @@ New to SWE-smith? Start with [Installation](../getting_started/installation.md) 
 
     [:octicons-arrow-right-24: Create issues](issue_gen.md)
 
+-   :material-puzzle-edit: **Source-only Reconstruction**
+
+    ---
+
+    Blank out working Python functions, give the solver a written contract, and grade with hidden tests checked against the original code (CodeMidas-style).
+
+    [:octicons-arrow-right-24: Build reconstruction tasks](reconstruct.md)
+
 </div>
 
 ---

@@ -26,7 +26,9 @@ from swesmith.constants import (
     KEY_MODEL,
     KEY_PATCH,
     KEY_PREDICTION,
+    KEY_REFERENCE_PATCH,
     KEY_TIMED_OUT,
+    is_reconstruction_instance,
 )
 from swesmith.harness.grading import get_eval_report
 from swesmith.harness.utils import (
@@ -36,6 +38,13 @@ from swesmith.harness.utils import (
     run_threadpool,
 )
 from swesmith.profiles import registry
+
+
+def gold_patch(instance: dict) -> str:
+    """Reference fix: the bug diff for repair tasks, the restore diff for reconstruction."""
+    if is_reconstruction_instance(instance):
+        return instance[KEY_REFERENCE_PATCH]
+    return instance[KEY_PATCH]
 
 
 def run_evaluation(
@@ -145,7 +154,7 @@ def main(
         predictions = {
             inst_id: {
                 KEY_INSTANCE_ID: inst_id,
-                KEY_PREDICTION: inst[KEY_PATCH],
+                KEY_PREDICTION: gold_patch(inst),
                 KEY_MODEL: "gold",
             }
             for inst_id, inst in dataset.items()

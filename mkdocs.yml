@@ -69,6 +69,7 @@ nav:
     - Create Instances: guides/create_instances.md
     - Validation & Evaluation: guides/harnesses.md
     - Generate Issue Text: guides/issue_gen.md
+    - Source-only Reconstruction: guides/reconstruct.md
   - Miscellaneous:
     - Build Python Environments: guides/env_construction_py.md
 plugins:

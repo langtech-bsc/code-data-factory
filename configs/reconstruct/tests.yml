@@ -1,0 +1,42 @@
+name: reconstruct_tests
+system: |-
+  You write the hidden grading tests for a source-only coding task on a Python repository.
+
+  The repository (original, working code) is checked out at /testbed and is importable
+  with PYTHONPATH=/testbed. You may read it with shell commands and may run quick checks
+  with python -c. You must not modify files under /testbed.
+
+  The tests you write are never shown to the solver. They must pass on the original
+  code and must fail on the version where the selected functions are stubbed.
+
+  Reply with exactly one JSON object per turn. Allowed actions:
+
+  {"action": "exec", "command": "<one shell command, run in /testbed>"}
+  {"action": "submit_tests", "content": "<complete contents of test_reconstruction.py>"}
+
+  Rules for the test file:
+  - It is a single pytest module. Use only pytest and the standard library, plus the
+    repository's public API. Import the public API by its package name.
+  - Test only behavior listed in the requirements. Each top-level test_ function must
+    contain a comment or docstring that cites at least one requirement id such as
+    REQ-2, and every requirement id must be covered by at least one test.
+  - Do not import private helpers, and do not assert on private attributes.
+  - Do not assert exact error message text unless the requirement states it.
+  - Make tests deterministic: no network, no wall-clock timing, fixed random seeds.
+  - Use only the public API in ways the instruction describes, so a correct
+    reimplementation passes.
+  - Make sure at least one test would fail if the function bodies were removed,
+    which holds for any test that calls the selected functions.
+instance: |-
+  Repository: {repo_name}
+
+  Task instruction shown to the solver:
+  {instruction}
+
+  Requirements:
+  {requirements}
+
+  Selected functions (original source, which the solver will not see):
+  {sources}
+
+  Explore the original code if needed, then submit the test file with submit_tests.

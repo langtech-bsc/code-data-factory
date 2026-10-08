@@ -24,6 +24,14 @@ KEY_IMAGE_NAME = "image_name"
 UTF8 = "utf-8"
 KEY_PATCH = "patch"
 KEY_TIMED_OUT = "timed_out"
+# Reconstruction (CodeMidas-style) instances: the solver starts from ``patch``
+# (a stub diff) on ``base_commit``; grading runs hidden pytest files mounted
+# read-only from ``verifier_dir``. ``reference_patch`` restores the original code.
+KEY_BASE_COMMIT = "base_commit"
+KEY_REFERENCE_PATCH = "reference_patch"
+KEY_VERIFIER_DIR = "verifier_dir"
+DEFAULT_BASE_COMMIT = "main"
+RECONSTRUCTION_TESTS_DIR = "/hidden_tests"
 WORK_ROOT = Path(os.environ.get("SWESMITH_WORK_ROOT", ".")).expanduser()
 LOG_ROOT = WORK_ROOT / "logs"
 LOG_DIR_BUG_GEN = LOG_ROOT / "bug_gen"
@@ -182,3 +190,8 @@ class BugRewrite:
 def generate_hash(s):
     rng = random.Random(int(hashlib.sha256(s.encode()).hexdigest(), 16))
     return "".join(rng.choice(string.ascii_lowercase + string.digits) for _ in range(8))
+
+
+def is_reconstruction_instance(instance: dict) -> bool:
+    """True for source-only reconstruction tasks graded by hidden tests."""
+    return KEY_VERIFIER_DIR in instance

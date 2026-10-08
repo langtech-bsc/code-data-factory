@@ -21,11 +21,17 @@ from swesmith.harness.constants import (
     TESTS_TIMEOUT,
 )
 from swesmith.constants import (
+    DEFAULT_BASE_COMMIT,
     GIT_APPLY_CMDS,
+    KEY_BASE_COMMIT,
     KEY_INSTANCE_ID,
+    KEY_PATCH,
+    KEY_VERIFIER_DIR,
+    RECONSTRUCTION_TESTS_DIR,
     TEST_OUTPUT_END,
     TEST_OUTPUT_START,
     UTF8,
+    is_reconstruction_instance,
 )
 from swesmith.profiles import registry
 from swesmith.runtime.singularity import SingularityRunner, make_workspace
@@ -111,6 +117,43 @@ def _checkout(runner: SingularityRunner, commit: str, logger: Logger) -> bool:
     return True
 
 
+def _apply_named_patch(
+    instance_id: str,
+    runner: SingularityRunner,
+    logger: Logger,
+    patch: str,
+    name: str,
+) -> None:
+    """Write ``patch`` into the workspace and apply it forward.
+
+    Reconstruction runs apply two forward patches (the stub, then the
+    prediction), so this never reverses anything.
+    """
+    host_path = runner.workspace / f".swesmith_{name}.diff"
+    host_path.write_text(patch)
+    try:
+        _apply_patch(
+            instance_id,
+            runner,
+            logger,
+            f"{runner.container_workdir}/.swesmith_{name}.diff",
+        )
+    finally:
+        host_path.unlink(missing_ok=True)
+
+
+def _reconstruction_test_command(rp) -> str:
+    """Run the profile's test command against the hidden verifier directory.
+
+    ``rp.test_cmd`` already activates the environment. ``PYTHONPATH`` makes the
+    stubbed checkout importable even when the profile did not install it.
+    """
+    return (
+        "export PYTHONPATH=/testbed${PYTHONPATH:+:$PYTHONPATH}; "
+        f"{rp.test_cmd} -p no:cacheprovider {RECONSTRUCTION_TESTS_DIR}"
+    )
+
+
 def run_patch_in_container(
     instance: dict,
     run_id: str,
@@ -155,36 +198,56 @@ def run_patch_in_container(
                 "-o IdentitiesOnly=yes"
             )
 
-        runner = SingularityRunner(rp.image_path, workspace, environment=ssh_env)
-        if commit is not None:
-            if not _checkout(runner, commit, logger):
-                return logger, False
-            if is_eval and not _checkout(runner, "HEAD~1", logger):
-                logger.info("CHECKOUT TO BUG STAGE FAILED")
-                return logger, False
-
-        if patch:
-            changed_files = [x.path for x in PatchSet(patch)]
-            if changed_files:
-                runner.exec_run("git checkout -- " + shlex.join(changed_files))
-            patch_file = workspace / ".swesmith_patch.diff"
-            patch_file.write_text(patch)
-            _apply_patch(
-                instance_id,
-                runner,
-                logger,
-                "/testbed/.swesmith_patch.diff",
-                is_gold=is_gold,
+        if is_reconstruction_instance(instance):
+            # Source-only reconstruction: start at base, apply the stub, then the
+            # prediction. Hidden tests are mounted read-only and never restored
+            # from the checkout, so commit/is_gold/f2p_only do not apply here.
+            runner = SingularityRunner(
+                rp.image_path,
+                workspace,
+                environment=ssh_env,
+                extra_binds=[
+                    (instance[KEY_VERIFIER_DIR], RECONSTRUCTION_TESTS_DIR, "ro")
+                ],
             )
-            patch_file.unlink(missing_ok=True)
+            base = instance.get(KEY_BASE_COMMIT, DEFAULT_BASE_COMMIT)
+            if not _checkout(runner, base, logger):
+                return logger, False
+            _apply_named_patch(instance_id, runner, logger, instance[KEY_PATCH], "stub")
+            if patch:
+                _apply_named_patch(instance_id, runner, logger, patch, "prediction")
+            test_command = _reconstruction_test_command(rp)
+        else:
+            runner = SingularityRunner(rp.image_path, workspace, environment=ssh_env)
+            if commit is not None:
+                if not _checkout(runner, commit, logger):
+                    return logger, False
+                if is_eval and not _checkout(runner, "HEAD~1", logger):
+                    logger.info("CHECKOUT TO BUG STAGE FAILED")
+                    return logger, False
 
-            if is_eval:
-                f2p_files, p2p_files = rp.get_test_files(instance)
-                test_files = f2p_files + p2p_files
-                if test_files:
-                    runner.exec_run("git checkout -- " + shlex.join(test_files))
+            if patch:
+                changed_files = [x.path for x in PatchSet(patch)]
+                if changed_files:
+                    runner.exec_run("git checkout -- " + shlex.join(changed_files))
+                patch_file = workspace / ".swesmith_patch.diff"
+                patch_file.write_text(patch)
+                _apply_patch(
+                    instance_id,
+                    runner,
+                    logger,
+                    "/testbed/.swesmith_patch.diff",
+                    is_gold=is_gold,
+                )
+                patch_file.unlink(missing_ok=True)
 
-        test_command, _ = rp.get_test_cmd(instance, f2p_only=f2p_only)
+                if is_eval:
+                    f2p_files, p2p_files = rp.get_test_files(instance)
+                    test_files = f2p_files + p2p_files
+                    if test_files:
+                        runner.exec_run("git checkout -- " + shlex.join(test_files))
+
+            test_command, _ = rp.get_test_cmd(instance, f2p_only=f2p_only)
         eval_script = "\n".join(
             [
                 "set -uxo pipefail",
